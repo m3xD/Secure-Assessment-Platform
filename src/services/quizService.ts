@@ -44,6 +44,21 @@ const quizService = {
       }
     );
   },
+
+  async getAllExams(): Promise<Quiz[]> {
+    const token = localStorage.getItem("auth_token");
+    if(!token) {
+      throw new Error("No authentication token found");
+    }
+    console.log(`>>> check bearer token: Bearer ${token}`);
+    const res = await axios.get(`${API_URL}/exams`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
+    });
+    console.log(">>> check res.data.data: ", res.data.data);
+    return res.data.data;
+  }
 };
 
 export default quizService;

@@ -25,12 +25,14 @@ export const useQuiz = (quizId?: string) => {
     }
   };
 
-  const submitQuiz = async (answers: Record<string, number>) => {
+  const submitQuiz = async (quizId: string, answers: Record<string, number>) => {
     try {
       if (!quizId) throw new Error("Quiz ID is required");
       await quizService.submitQuiz(quizId, answers);
+      return true;
     } catch (err) {
       throw new Error("Failed to submit quiz");
+      return false;
     }
   };
 

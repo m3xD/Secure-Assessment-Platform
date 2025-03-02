@@ -25,7 +25,7 @@ const SignInPage = () => {
     try {
       // Add your authentication logic here
       await login(formData.email, formData.password); // Simulated API call
-      navigate("/student/dashboard");
+      navigate("/student/exams");
     } catch (err) {
       setError("Invalid email or password");
     } finally {

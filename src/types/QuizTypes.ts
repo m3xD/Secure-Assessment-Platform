@@ -2,13 +2,13 @@ export interface Question {
   id: string;
   text: string;
   options: string[];
-  correctAnswer?: number;
+  correct_option?: number;
+  exam_id: string;
 }
 
 export interface Quiz {
   id: string;
   title: string;
-  subject: string;
   duration: number;
   questions: Question[];
 }

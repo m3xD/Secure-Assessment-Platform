@@ -26,6 +26,7 @@ const Header = () => {
                   <>
                     <Nav.Link href="/student/dashboard">Dashboard</Nav.Link>
                     <Nav.Link href="/student/quizzes">My Quizzes</Nav.Link>
+                    <Nav.Link href="/student/exams">My Exams List</Nav.Link>
                   </>
                 ) : (
                   <>
