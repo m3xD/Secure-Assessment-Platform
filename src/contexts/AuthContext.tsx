@@ -2,6 +2,7 @@ import React, { createContext, useEffect, useState, useCallback } from "react";
 import { AuthContextType, AuthState } from "../types/AuthTypes";
 import authService from "../services/authService";
 import { getUserIDFromToken, isTokenExpired } from "../utils/jwtUtils";
+import userService from "../services/userService";
 
 export const AuthContext = createContext<AuthContextType | undefined>(
   undefined
@@ -83,7 +84,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         const userId = getUserIDFromToken(token);
         if (userId) {
-          const user = await authService.getUser(userId);
+          const user = await userService.getUser(userId);
           localStorage.setItem("userData", JSON.stringify(user));
           setAuthState({
             user,
@@ -173,7 +174,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const getUser = async (id: string, providedToken?: string) => {
     try {
-      const user = await authService.getUser(id, providedToken);
+      const user = await userService.getUser(id, providedToken);
       return user;
     } catch (error) {
       throw new Error("Failed to get user");
@@ -189,7 +190,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     providedToken?: string
   ) => {
     try {
-      const updatedUser = await authService.updateUser(
+      const updatedUser = await userService.updateUser(
         id,
         fullName,
         email,
@@ -212,7 +213,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const deleteUser = async (id: string, providedToken?: string) => {
     try {
-      await authService.deleteUser(id, providedToken);
+      await userService.deleteUser(id, providedToken);
     } catch (error) {
       throw new Error("Failed to delete user");
     }
@@ -230,7 +231,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const listUsers = async (providedToken?: string) => {
     try {
-      const users = await authService.listUsers(providedToken);
+      const users = await userService.listUsers(providedToken);
       return users;
     } catch (error) {
       throw new Error("Failed to list users");
@@ -246,7 +247,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     providedToken?: string
   ) => {
     try {
-      const user = await authService.createUser(
+      const user = await userService.createUser(
         fullName,
         email,
         phone,

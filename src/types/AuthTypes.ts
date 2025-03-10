@@ -1,3 +1,5 @@
+import { User } from "./UserTypes";
+
 export interface SignInFormData {
   email: string;
   password: string;
@@ -11,14 +13,6 @@ export interface SignUpFormData {
   confirmPassword: string;
 }
 
-export interface User {
-  id: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  avatar: string;
-  role: "user" | "admin";
-}
 
 export interface AuthState {
   user: User | null;
