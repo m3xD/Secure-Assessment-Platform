@@ -4,18 +4,20 @@ export interface SignInFormData {
 }
 
 export interface SignUpFormData {
-  name: string;
+  fullName: string;
   email: string;
+  phone: string;
   password: string;
   confirmPassword: string;
-  role: "student" | "teacher";
 }
 
 export interface User {
   id: string;
-  name: string;
+  fullName: string;
   email: string;
-  role: "student" | "teacher";
+  phone: string;
+  avatar: string;
+  role: "user" | "admin";
 }
 
 export interface AuthState {
@@ -26,12 +28,32 @@ export interface AuthState {
 
 export interface AuthContextType {
   authState: AuthState;
-  login: (email: string, password: string) => Promise<void>;
+  signin: (email: string, password: string) => Promise<User>;
   logout: () => void;
   signup: (
-    name: string,
+    fullName: string,
     email: string,
-    password: string,
-    role: "student" | "teacher"
+    phone: string,
+    password: string
   ) => Promise<void>;
+  getUser: (id: string, providedToken?: string) => Promise<User>;
+  updateUser: (
+    id: string,
+    fullName: string,
+    email: string,
+    phone: string,
+    role: "user" | "admin",
+    providedToken?: string,
+  ) => Promise<User>;
+  deleteUser: (id: string, providedToken?: string) => Promise<void>;
+  refreshToken: (refresh_token: string) => Promise<string>;
+  listUsers: (providedToken?: string) => Promise<User[]>;
+  createUser: (
+    fullName: string,
+    email: string,
+    phone: string,
+    password: string,
+    role: "user" | "admin",
+    providedToken?: string
+  ) => Promise<User>;
 }

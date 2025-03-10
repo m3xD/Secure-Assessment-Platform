@@ -1,21 +1,24 @@
 import React, { useState } from "react";
 import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import './SignUpPage.scss';
+import "./SignUpPage.scss";
 import { SignUpFormData } from "../../../types/AuthTypes";
+import { useAuth } from "../../../hooks/useAuth";
+import { toast } from "react-toastify";
 
-
-const SignUpPage = () => {
+const SignUpPage: React.FC = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<SignUpFormData>({
-    name: "",
+    fullName: "",
     email: "",
+    phone: "",
     password: "",
     confirmPassword: "",
-    role: "student",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const {signup} = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +33,8 @@ const SignUpPage = () => {
 
     try {
       // Add your registration logic here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulated API call
+      await signup(formData.fullName, formData.email, formData.phone, formData.password);
+      toast.success("Account created successfully. Please sign in.");
       navigate("/signin");
     } catch (err) {
       setError("Failed to create account. Please try again.");
@@ -57,9 +61,9 @@ const SignUpPage = () => {
                 <Form.Control
                   type="text"
                   placeholder="Enter your full name"
-                  value={formData.name}
+                  value={formData.fullName}
                   onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
+                    setFormData({ ...formData, fullName: e.target.value })
                   }
                   required
                 />
@@ -73,6 +77,19 @@ const SignUpPage = () => {
                   value={formData.email}
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
+                  }
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Phone number</Form.Label>
+                <Form.Control
+                  type="string"
+                  placeholder="Enter your phone number"
+                  value={formData.phone}
+                  onChange={(e) =>
+                    setFormData({ ...formData, phone: e.target.value })
                   }
                   required
                 />
@@ -107,7 +124,7 @@ const SignUpPage = () => {
                 />
               </Form.Group>
 
-              <Form.Group className="mb-4">
+              {/* <Form.Group className="mb-4">
                 <Form.Label>I am a</Form.Label>
                 <div>
                   <Form.Check
@@ -131,13 +148,20 @@ const SignUpPage = () => {
                     }
                   />
                 </div>
-              </Form.Group>
+              </Form.Group> */}
 
               <Button
                 variant="primary"
                 type="submit"
                 className="w-100 mb-3"
-                disabled={loading || !formData.name || !formData.email || !formData.password || !formData.confirmPassword}
+                disabled={
+                  loading ||
+                  !formData.fullName ||
+                  !formData.email ||
+                  !formData.phone ||
+                  !formData.password ||
+                  !formData.confirmPassword
+                }
               >
                 {loading ? "Creating account..." : "Create Account"}
               </Button>

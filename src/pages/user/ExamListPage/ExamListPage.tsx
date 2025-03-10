@@ -1,8 +1,8 @@
-import React from "react";
 import { useExams } from "../../../hooks/useExams";
 import { Card, Col, Container, Row } from "react-bootstrap";
+import './ExamListPage.scss';
 
-const ExamListPage = () => {
+const ExamListPage: React.FC = () => {
   const { exams, loading, error } = useExams();
 
   if (loading) {
@@ -14,7 +14,7 @@ const ExamListPage = () => {
   }
 
   return (
-    <Container>
+    <Container className="examlist-page">
       <h1>Available Exams</h1>
       <Row>
         {exams.map((exam) => (

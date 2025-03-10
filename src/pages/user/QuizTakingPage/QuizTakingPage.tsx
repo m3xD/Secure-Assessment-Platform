@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { Container, Card, Form, Button, ProgressBar, Alert } from "react-bootstrap"
 import { Clock } from "react-feather"
 import { useQuiz } from "../../../hooks/useQuiz"
 import "./QuizTakingPage.scss"
 
-const QuizTakingPage = () => {
+const QuizTakingPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { quiz, loading, error, submitQuiz } = useQuiz(id)

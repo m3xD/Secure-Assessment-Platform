@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import "./Header.scss";
 import { useAuth } from "../../hooks/useAuth";
 
-const Header = () => {
+const Header: React.FC = () => {
   const { authState, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -22,23 +22,23 @@ const Header = () => {
           {authState.isAuthenticated ? (
             <>
               <Nav className="me-auto">
-                {authState.user?.role === "student" ? (
+                {authState.user?.role === "user" ? (
                   <>
-                    <Nav.Link href="/student/dashboard">Dashboard</Nav.Link>
-                    <Nav.Link href="/student/quizzes">My Quizzes</Nav.Link>
-                    <Nav.Link href="/student/exams">My Exams List</Nav.Link>
+                    <Nav.Link href="/user/dashboard">Dashboard</Nav.Link>
+                    <Nav.Link href="/user/quizzes">My Quizzes</Nav.Link>
+                    <Nav.Link href="/user/exams">My Exams List</Nav.Link>
                   </>
                 ) : (
                   <>
-                    <Nav.Link href="/teacher/dashboard">Dashboard</Nav.Link>
-                    <Nav.Link href="/teacher/quizzes">Manage Quizzes</Nav.Link>
-                    <Nav.Link href="/teacher/monitoring">Monitor</Nav.Link>
+                    <Nav.Link href="/admin/dashboard">Dashboard</Nav.Link>
+                    <Nav.Link href="/admin/quizzes">Manage Quizzes</Nav.Link>
+                    <Nav.Link href="/admin/monitoring">Monitor</Nav.Link>
                   </>
                 )}
               </Nav>
               <Nav>
                 <NavDropdown
-                  title={authState.user?.name || "User"}
+                  title={authState.user?.fullName || "User"}
                   id="basic-nav-dropdown"
                 >
                   <NavDropdown.Item href="/profile">Profile</NavDropdown.Item>

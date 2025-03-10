@@ -3,9 +3,9 @@ import { Container, Row, Col, Card, Badge } from "react-bootstrap";
 import { Calendar, Clock, Award } from "react-feather";
 import { useAuth } from "../../../hooks/useAuth";
 import { useStudentDashboard } from "../../../hooks/useQuiz";
-import "./StudentDashboard.scss";
+import "./UserDashboard.scss";
 
-const StudentDashboard = () => {
+const UserDashboard: React.FC = () => {
   const { authState } = useAuth();
   const { data, loading, error } = useStudentDashboard();
 
@@ -16,10 +16,10 @@ const StudentDashboard = () => {
   const { upcomingQuizzes, recentQuizzes, stats } = data;
 
   return (
-    <div className="student-dashboard">
+    <div className="user-dashboard">
       <Container>
         <div className="dashboard-header">
-          <h1>Welcome back, {authState.user?.name}!</h1>
+          <h1>Welcome back, {authState.user?.fullName}!</h1>
           <p className="text-muted">Here's your learning progress</p>
         </div>
 
@@ -114,4 +114,4 @@ const StudentDashboard = () => {
   );
 };
 
-export default StudentDashboard;
+export default UserDashboard;
