@@ -17,6 +17,7 @@ import ToastComponent from "./components/Toast/ToastComponent";
 import UserDashboard from "./pages/user/UserDashboard/UserDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard/AdminDashboard";
 import ProfilePage from "./pages/profile/ProfilePage";
+import UserManagementPage from "./pages/admin/UserManagementPage/UserManagementPage";
 
 // Create a protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -146,6 +147,18 @@ function App() {
             <ProtectedRoute>
               {authState.user?.role === "admin" ? (
                 <AdminDashboard />
+              ) : (
+                <Navigate to="/" />
+              )}
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <ProtectedRoute>
+              {authState.user?.role === "admin" ? (
+                <UserManagementPage />
               ) : (
                 <Navigate to="/" />
               )}

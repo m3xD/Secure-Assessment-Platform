@@ -91,17 +91,24 @@ const userService = {
   },
 
   // service to list user
-  async listUsers(providedToken?: string): Promise<User[]> {
+  async listUsers(
+    page: number,
+    pageSize: number,
+    providedToken?: string
+  ): Promise<{ users: User[]; total_page: number; total_user: number }> {
     try {
       const token = providedToken || localStorage.getItem("access_token");
       if (!token) {
         throw new Error("No authentication token found");
       }
-      const res = await axios.get(`${API_URL}/users/list`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await axios.get(
+        `${API_URL}/users/list?page=${page}&pageSize=${pageSize}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       console.log(">>> check res listUsers: ", res);
       const usersData = res.data.data;
       const users: User[] = usersData.map((userData: any) => ({
@@ -112,7 +119,9 @@ const userService = {
         avatar: userData.avatar || "",
         role: userData.role || "user",
       }));
-      return users;
+      const total_page = res.data.meta.total_page;
+      const total_user = res.data.meta.total_user;
+      return { users, total_page, total_user };
     } catch (error) {
       throw new Error("Failed to list users");
     }

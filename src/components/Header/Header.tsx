@@ -32,7 +32,7 @@ const Header: React.FC = () => {
                   <>
                     <Nav.Link href="/admin/dashboard">Dashboard</Nav.Link>
                     <Nav.Link href="/admin/quizzes">Manage Quizzes</Nav.Link>
-                    <Nav.Link href="/admin/monitoring">Monitor</Nav.Link>
+                    <Nav.Link href="/admin/users">Manage User</Nav.Link>               
                   </>
                 )}
               </Nav>

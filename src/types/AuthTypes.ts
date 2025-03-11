@@ -13,7 +13,6 @@ export interface SignUpFormData {
   confirmPassword: string;
 }
 
-
 export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
@@ -37,11 +36,15 @@ export interface AuthContextType {
     email: string,
     phone: string,
     role: "user" | "admin",
-    providedToken?: string,
+    providedToken?: string
   ) => Promise<User>;
   deleteUser: (id: string, providedToken?: string) => Promise<void>;
   refreshToken: (refresh_token: string) => Promise<string>;
-  listUsers: (providedToken?: string) => Promise<User[]>;
+  listUsers: (
+    page: number,
+    pageSize: number,
+    providedToken?: string
+  ) => Promise<{ users: User[]; total_page: number; total_user: number }>;
   createUser: (
     fullName: string,
     email: string,

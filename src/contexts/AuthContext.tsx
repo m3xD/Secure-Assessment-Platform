@@ -196,9 +196,9 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         email,
         phone,
         role,
-        providedToken,
+        providedToken
       );
-      if(updatedUser.id === authState.user?.id) {
+      if (updatedUser.id === authState.user?.id) {
         localStorage.setItem("userData", JSON.stringify(updatedUser));
         setAuthState((prev) => ({
           ...prev,
@@ -229,10 +229,14 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const listUsers = async (providedToken?: string) => {
+  const listUsers = async (
+    page: number,
+    pageSize: number,
+    providedToken?: string
+  ) => {
     try {
-      const users = await userService.listUsers(providedToken);
-      return users;
+      const res = await userService.listUsers(page, pageSize, providedToken);
+      return res;
     } catch (error) {
       throw new Error("Failed to list users");
     }
