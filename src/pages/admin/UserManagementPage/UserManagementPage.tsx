@@ -1,21 +1,15 @@
 import React, { useState, useEffect } from "react";
 import {
   Container,
-  Table,
   Button,
-  Modal,
   Form,
   Row,
   Col,
   InputGroup,
   Card,
-  Badge,
   Alert,
-  Spinner,
-  Pagination,
 } from "react-bootstrap";
 import { Search, Plus, X, Filter } from "react-feather";
-import { useAuth } from "../../../hooks/useAuth";
 import { User as UserType } from "../../../types/UserTypes";
 import {
   validateField,
@@ -26,10 +20,11 @@ import { toast } from "react-toastify";
 import UsersTable from "../../../components/UsersTable/UsersTable";
 import UserModal from "../../../components/UserModal/UserModal";
 import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal/DeleteConfirmationModal";
+import { useUserService } from "../../../hooks/useUserService";
 
 const UserManagementPage: React.FC = () => {
   // Auth context for user operations
-  const { createUser, updateUser, deleteUser, listUsers } = useAuth();
+  const { createUser, updateUser, deleteUser, listUsers } = useUserService();
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -85,17 +80,17 @@ const UserManagementPage: React.FC = () => {
       setLoading(true);
       setError(null);
       const res = await listUsers(currentPage, pageSize);
-      
+
       // Kiểm tra kỹ response
       console.log(">>> Full response from listUsers:", res);
       console.log(">>> Users array:", res.users);
       console.log(">>> Total user:", res.total_user);
       console.log(">>> Total page:", res.total_page);
-      
+
       if (!res.users || res.users.length === 0) {
         console.warn("Empty users array returned from API");
       }
-      
+
       setUsers(res.users || []);
       setFilteredUsers(res.users || []);
       setTotalUsers(res.total_user || 0);

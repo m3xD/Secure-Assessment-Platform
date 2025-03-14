@@ -21,6 +21,7 @@ export interface AuthState {
 
 export interface AuthContextType {
   authState: AuthState;
+  setAuthState: React.Dispatch<React.SetStateAction<AuthState>>;
   signin: (email: string, password: string) => Promise<User>;
   logout: () => void;
   signup: (
@@ -29,28 +30,5 @@ export interface AuthContextType {
     phone: string,
     password: string
   ) => Promise<void>;
-  getUser: (id: string, providedToken?: string) => Promise<User>;
-  updateUser: (
-    id: string,
-    fullName: string,
-    email: string,
-    phone: string,
-    role: "user" | "admin",
-    providedToken?: string
-  ) => Promise<User>;
-  deleteUser: (id: string, providedToken?: string) => Promise<void>;
   refreshToken: (refresh_token: string) => Promise<string>;
-  listUsers: (
-    page: number,
-    pageSize: number,
-    providedToken?: string
-  ) => Promise<{ users: User[]; total_page: number; total_user: number }>;
-  createUser: (
-    fullName: string,
-    email: string,
-    phone: string,
-    password: string,
-    role: "user" | "admin",
-    providedToken?: string
-  ) => Promise<User>;
 }

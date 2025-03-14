@@ -172,53 +172,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const getUser = async (id: string, providedToken?: string) => {
-    try {
-      const user = await userService.getUser(id, providedToken);
-      return user;
-    } catch (error) {
-      throw new Error("Failed to get user");
-    }
-  };
-
-  const updateUser = async (
-    id: string,
-    fullName: string,
-    email: string,
-    phone: string,
-    role: "user" | "admin",
-    providedToken?: string
-  ) => {
-    try {
-      const updatedUser = await userService.updateUser(
-        id,
-        fullName,
-        email,
-        phone,
-        role,
-        providedToken
-      );
-      if (updatedUser.id === authState.user?.id) {
-        localStorage.setItem("userData", JSON.stringify(updatedUser));
-        setAuthState((prev) => ({
-          ...prev,
-          user: updatedUser,
-        }));
-      }
-      return updatedUser;
-    } catch (error) {
-      throw new Error("Failed to update user");
-    }
-  };
-
-  const deleteUser = async (id: string, providedToken?: string) => {
-    try {
-      await userService.deleteUser(id, providedToken);
-    } catch (error) {
-      throw new Error("Failed to delete user");
-    }
-  };
-
   const refreshToken = async (refresh_token: string) => {
     try {
       const access_token = await authService.refreshToken(refresh_token);
@@ -229,53 +182,13 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const listUsers = async (
-    page: number,
-    pageSize: number,
-    providedToken?: string
-  ) => {
-    try {
-      const res = await userService.listUsers(page, pageSize, providedToken);
-      return res;
-    } catch (error) {
-      throw new Error("Failed to list users");
-    }
-  };
-
-  const createUser = async (
-    fullName: string,
-    email: string,
-    phone: string,
-    password: string,
-    role: "user" | "admin",
-    providedToken?: string
-  ) => {
-    try {
-      const user = await userService.createUser(
-        fullName,
-        email,
-        phone,
-        password,
-        role,
-        providedToken
-      );
-      return user;
-    } catch (error) {
-      throw new Error("Failed to create new user");
-    }
-  };
-
   const value = {
     authState,
+    setAuthState,
     signin,
     logout,
     signup,
-    getUser,
-    updateUser,
-    deleteUser,
     refreshToken,
-    createUser,
-    listUsers,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
