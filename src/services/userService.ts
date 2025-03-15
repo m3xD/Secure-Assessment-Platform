@@ -16,7 +16,11 @@ const userApi = () => {
 };
 
 const userService = {
-  // service to get user
+  /**
+   * Get user by ID
+   * @param {string} id - User ID
+   * @returns {Promise<User>} - User object
+   */
   async getUser(id: string): Promise<User> {
     try {
       const res = await userApi().get(`/users/${id}`);
@@ -36,7 +40,15 @@ const userService = {
     }
   },
 
-  // service to update user
+  /**
+   * Update user
+   * @param {string} id - User ID
+   * @param {string} fullName - Full name
+   * @param {string} email -Email
+   * @param {string} phone - Phone
+   * @param {"user" | "admin"} role - Role
+   * @returns {Promise<User>} - User object
+   */
   async updateUser(
     id: string,
     fullName: string,
@@ -68,7 +80,11 @@ const userService = {
     }
   },
 
-  // service to delete user
+  /**
+   * Delete user
+   * @param {string} id - User ID
+   * @returns {Promise<void>} - Promise object
+   */
   async deleteUser(id: string): Promise<void> {
     try {
       await userApi().delete(`/users/${id}`);
@@ -77,7 +93,12 @@ const userService = {
     }
   },
 
-  // service to list user
+  /**
+   * list all users
+   * @param {number} page - Current page
+   * @param {number} pageSize - Number of pages
+   * @returns {Promise<{ users: User[]; total_page: number; total_user: number }>} - List of users, total page, total user
+   */
   async listUsers(
     page: number,
     pageSize: number
@@ -104,7 +125,15 @@ const userService = {
     }
   },
 
-  // service to create user
+  /**
+   * Create user
+   * @param {string} fullName - Full name
+   * @param {string} email - Email
+   * @param {string} phone - Phone
+   * @param {string} password - Password
+   * @param {"user" | "admin"} role - Role
+   * @returns {Promise<User>} - User object
+   */
   async createUser(
     fullName: string,
     email: string,
@@ -136,6 +165,27 @@ const userService = {
       throw new Error("Failed to create user");
     }
   },
+
+  /**
+   * Change password
+   * @param id - User ID
+   * @param passwordData - Old password and new password
+   * @returns {Promise<void>} - Promise object
+   */
+  async changePassword(
+    id: string,
+    passwordData: {
+      oldPassword: string;
+      newPassword: string;
+    }
+  ): Promise<void> {
+    try {
+      await userApi().post(`/users/${id}/change-password`, passwordData);
+    } catch (error) {
+      throw new Error("Failed to change password");
+    }
+  },
+  
 };
 
 export default userService;

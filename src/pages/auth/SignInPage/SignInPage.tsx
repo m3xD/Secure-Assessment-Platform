@@ -27,7 +27,7 @@ const SignInPage: React.FC = () => {
       // Add your authentication logic here
       const user = await signin(formData.email, formData.password); 
       toast.success(`Welcome back, ${user.fullName}!`);
-      navigate("/user/exams");
+      // navigate("/user/exams");
     } catch (err) {
       setError("Invalid email or password");
     } finally {

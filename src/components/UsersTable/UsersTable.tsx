@@ -98,7 +98,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
             </Table>
 
             {/* Pagination */}
-            <div className="d-flex justify-content-between align-items-center mt-4">
+            <div className="d-flex justify-content-between align-items-center mt-4 p-2">
               <div>
                 <span className="text-muted">
                   Showing{" "}

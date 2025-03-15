@@ -1,7 +1,19 @@
 import axios from "axios";
 import { User } from "../types/UserTypes";
+import { getAccessTokenFromLocalStorage } from "../utils/localStorageUtils";
 
 const API_URL = "https://auth-service-6f3ceb0b5b52.herokuapp.com";
+
+// create an axios instance with auth headers
+const authApi = () => {
+  const token = getAccessTokenFromLocalStorage();
+  return axios.create({
+    baseURL: API_URL,
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
 
 const authService = {
   // service to signin
@@ -56,9 +68,7 @@ const authService = {
   // service to refresh token
   async refreshToken(refreshToken: string): Promise<string> {
     try {
-      const res = await axios.post(`${API_URL}/auth/refresh`, {
-        refresh_token: refreshToken,
-      });
+      const res = await authApi().post(`/auth/refresh-token`);
       return res.data.data.access_token;
     } catch (error) {
       throw new Error("Failed to refresh token");
