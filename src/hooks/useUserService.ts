@@ -15,17 +15,15 @@ export const useUserService = () => {
 
   const updateUser = async (
     id: string,
-    fullName: string,
+    name: string,
     email: string,
-    phone: string,
     role: "user" | "admin"
   ) => {
     try {
       const updatedUser = await userService.updateUser(
         id,
-        fullName,
+        name,
         email,
-        phone,
         role
       );
       if (updatedUser.id === authState.user?.id) {
@@ -59,17 +57,15 @@ export const useUserService = () => {
   };
 
   const createUser = async (
-    fullName: string,
+    name: string,
     email: string,
-    phone: string,
     password: string,
     role: "user" | "admin"
   ) => {
     try {
       const user = await userService.createUser(
-        fullName,
+        name,
         email,
-        phone,
         password,
         role
       );

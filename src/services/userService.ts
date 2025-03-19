@@ -1,12 +1,12 @@
 import axios from "axios";
 import { User } from "../types/UserTypes";
-import { getAccessTokenFromLocalStorage } from "../utils/localStorageUtils";
+import { getTokenFromLocalStorage } from "../utils/localStorageUtils";
 
 const API_URL = "https://auth-service-6f3ceb0b5b52.herokuapp.com";
 
 // create an axios instance with auth headers
 const userApi = () => {
-  const token = getAccessTokenFromLocalStorage();
+  const token = getTokenFromLocalStorage();
   return axios.create({
     baseURL: API_URL,
     headers: {
@@ -28,10 +28,8 @@ const userService = {
       const userData = res.data.data;
       const user: User = {
         id: userData.id,
-        fullName: userData.full_name,
+        name: userData.name,
         email: userData.email,
-        phone: userData.phone,
-        avatar: userData.avatar || "",
         role: userData.role || "user",
       };
       return user;
@@ -43,24 +41,21 @@ const userService = {
   /**
    * Update user
    * @param {string} id - User ID
-   * @param {string} fullName - Full name
+   * @param {string} name - Name
    * @param {string} email -Email
-   * @param {string} phone - Phone
    * @param {"user" | "admin"} role - Role
    * @returns {Promise<User>} - User object
    */
   async updateUser(
     id: string,
-    fullName: string,
+    name: string,
     email: string,
-    phone: string,
     role: "user" | "admin"
   ): Promise<User> {
     try {
       const reqData = {
-        full_name: fullName,
+        name: name,
         email,
-        phone,
         role,
       };
       const res = await userApi().put(`/users/${id}`, reqData);
@@ -68,10 +63,8 @@ const userService = {
       const userData = res.data.data;
       const user: User = {
         id: userData.id,
-        fullName: userData.full_name,
+        name: userData.name,
         email: userData.email,
-        phone: userData.phone,
-        avatar: userData.avatar || "",
         role: userData.role || "user",
       };
       return user;
@@ -111,10 +104,8 @@ const userService = {
       const usersData = res.data.data;
       const users: User[] = usersData.map((userData: any) => ({
         id: userData.id,
-        fullName: userData.full_name,
+        name: userData.name,
         email: userData.email,
-        phone: userData.phone,
-        avatar: userData.avatar || "",
         role: userData.role || "user",
       }));
       const total_page = res.data.meta.total_page;
@@ -127,25 +118,22 @@ const userService = {
 
   /**
    * Create user
-   * @param {string} fullName - Full name
+   * @param {string} name - Name
    * @param {string} email - Email
-   * @param {string} phone - Phone
    * @param {string} password - Password
    * @param {"user" | "admin"} role - Role
    * @returns {Promise<User>} - User object
    */
   async createUser(
-    fullName: string,
+    name: string,
     email: string,
-    phone: string,
     password: string,
     role: "user" | "admin"
   ): Promise<User> {
     try {
       const reqData = {
-        full_name: fullName,
+        name: name,
         email,
-        phone,
         password,
         role,
       };
@@ -154,10 +142,8 @@ const userService = {
       const userData = res.data.data;
       const user: User = {
         id: userData.id,
-        fullName: userData.full_name,
+        name: userData.name,
         email: userData.email,
-        phone: userData.phone,
-        avatar: userData.avatar || "",
         role: userData.role || "user",
       };
       return user;
@@ -185,7 +171,6 @@ const userService = {
       throw new Error("Failed to change password");
     }
   },
-  
 };
 
 export default userService;

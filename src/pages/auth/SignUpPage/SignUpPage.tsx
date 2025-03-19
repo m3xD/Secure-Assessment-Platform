@@ -9,16 +9,16 @@ import { toast } from "react-toastify";
 const SignUpPage: React.FC = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<SignUpFormData>({
-    fullName: "",
+    name: "",
     email: "",
-    phone: "",
     password: "",
     confirmPassword: "",
+    role: 'user'
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const {signup} = useAuth();
+  const { signup } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +33,7 @@ const SignUpPage: React.FC = () => {
 
     try {
       // Add your registration logic here
-      await signup(formData.fullName, formData.email, formData.phone, formData.password);
+      await signup(formData.name, formData.email, formData.password, formData.role);
       toast.success("Account created successfully. Please sign in.");
       navigate("/signin");
     } catch (err) {
@@ -57,13 +57,13 @@ const SignUpPage: React.FC = () => {
 
             <Form onSubmit={handleSubmit}>
               <Form.Group className="mb-3">
-                <Form.Label>Full Name</Form.Label>
+                <Form.Label>Name</Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="Enter your full name"
-                  value={formData.fullName}
+                  placeholder="Enter your name"
+                  value={formData.name}
                   onChange={(e) =>
-                    setFormData({ ...formData, fullName: e.target.value })
+                    setFormData({ ...formData, name: e.target.value })
                   }
                   required
                 />
@@ -77,19 +77,6 @@ const SignUpPage: React.FC = () => {
                   value={formData.email}
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
-                  }
-                  required
-                />
-              </Form.Group>
-
-              <Form.Group className="mb-3">
-                <Form.Label>Phone number</Form.Label>
-                <Form.Control
-                  type="string"
-                  placeholder="Enter your phone number"
-                  value={formData.phone}
-                  onChange={(e) =>
-                    setFormData({ ...formData, phone: e.target.value })
                   }
                   required
                 />
@@ -124,31 +111,31 @@ const SignUpPage: React.FC = () => {
                 />
               </Form.Group>
 
-              {/* <Form.Group className="mb-4">
+              <Form.Group className="mb-4">
                 <Form.Label>I am a</Form.Label>
                 <div>
                   <Form.Check
                     inline
                     type="radio"
-                    label="Student"
+                    label="User"
                     name="role"
-                    checked={formData.role === "student"}
+                    checked={formData.role === "user"}
                     onChange={() =>
-                      setFormData({ ...formData, role: "student" })
+                      setFormData({ ...formData, role: "user" })
                     }
                   />
                   <Form.Check
                     inline
                     type="radio"
-                    label="Teacher"
+                    label="Admin"
                     name="role"
-                    checked={formData.role === "teacher"}
+                    checked={formData.role === "admin"}
                     onChange={() =>
-                      setFormData({ ...formData, role: "teacher" })
+                      setFormData({ ...formData, role: "admin" })
                     }
                   />
                 </div>
-              </Form.Group> */}
+              </Form.Group>
 
               <Button
                 variant="primary"
@@ -156,9 +143,8 @@ const SignUpPage: React.FC = () => {
                 className="w-100 mb-3"
                 disabled={
                   loading ||
-                  !formData.fullName ||
+                  !formData.name ||
                   !formData.email ||
-                  !formData.phone ||
                   !formData.password ||
                   !formData.confirmPassword
                 }

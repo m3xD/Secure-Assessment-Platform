@@ -59,7 +59,6 @@ const UsersTable: React.FC<UsersTableProps> = ({
                 <tr>
                   <th>Name</th>
                   <th>Email</th>
-                  <th>Phone</th>
                   <th>Role</th>
                   <th className="text-center">Actions</th>
                 </tr>
@@ -67,9 +66,8 @@ const UsersTable: React.FC<UsersTableProps> = ({
               <tbody>
                 {filteredUsers.map((user) => (
                   <tr key={user.id}>
-                    <td>{user.fullName}</td>
+                    <td>{user.name}</td>
                     <td>{user.email}</td>
-                    <td>{user.phone}</td>
                     <td>
                       <Badge bg={user.role === "admin" ? "danger" : "primary"}>
                         {user.role}

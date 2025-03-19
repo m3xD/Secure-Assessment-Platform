@@ -6,11 +6,11 @@ export interface SignInFormData {
 }
 
 export interface SignUpFormData {
-  fullName: string;
+  name: string;
   email: string;
-  phone: string;
   password: string;
   confirmPassword: string;
+  role: "user" | "admin";
 }
 
 export interface AuthState {
@@ -25,10 +25,10 @@ export interface AuthContextType {
   signin: (email: string, password: string) => Promise<User>;
   logout: () => void;
   signup: (
-    fullName: string,
+    name: string,
     email: string,
-    phone: string,
-    password: string
+    password: string,
+    role: "user" | "admin"
   ) => Promise<void>;
-  refreshToken: (refresh_token: string) => Promise<string>;
+  refreshToken: (refreshToken: string) => Promise<void>;
 }

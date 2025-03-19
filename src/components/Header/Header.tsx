@@ -38,7 +38,7 @@ const Header: React.FC = () => {
               </Nav>
               <Nav>
                 <NavDropdown
-                  title={authState.user?.fullName || "User"}
+                  title={authState.user?.name || "User"}
                   id="basic-nav-dropdown"
                 >
                   <NavDropdown.Item href="/profile">Profile</NavDropdown.Item>

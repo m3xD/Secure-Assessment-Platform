@@ -4,7 +4,7 @@
 
 export const validationPatterns = {
   // Name: allows letters, spaces, and some special characters used in names
-  fullName: {
+  name: {
     pattern: /^[a-zA-ZÀ-ÖØ-öø-ÿ\s'-]{2,50}$/,
     message: "Name should contain only letters, spaces, hyphens and apostrophes (2-50 characters)"
   },

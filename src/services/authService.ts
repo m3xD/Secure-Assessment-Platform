@@ -1,12 +1,12 @@
 import axios from "axios";
 import { User } from "../types/UserTypes";
-import { getAccessTokenFromLocalStorage } from "../utils/localStorageUtils";
+import { getTokenFromLocalStorage } from "../utils/localStorageUtils";
 
 const API_URL = "https://auth-service-6f3ceb0b5b52.herokuapp.com";
 
 // create an axios instance with auth headers
 const authApi = () => {
-  const token = getAccessTokenFromLocalStorage();
+  const token = getTokenFromLocalStorage();
   return axios.create({
     baseURL: API_URL,
     headers: {
@@ -20,7 +20,7 @@ const authService = {
   async signin(
     email: string,
     password: string
-  ): Promise<{ access_token: string; refresh_token: string; user: User }> {
+  ): Promise<{ token: string, refreshToken: string, user: User }> {
     try {
       const reqData = {
         email,
@@ -28,18 +28,16 @@ const authService = {
       };
       const res = await axios.post(`${API_URL}/auth/login`, reqData);
       console.log(">>> check res signin: ", res);
-      const access_token = res.data.data.access_token;
-      const refresh_token = res.data.data.refresh_token;
-      const userData = res.data.data.user;
+      const token = res.data.token;
+      const refreshToken = res.data.refreshToken;
+      const userData = res.data.user;
       const user: User = {
         id: userData.id,
-        fullName: userData.full_name,
+        name: userData.name,
         email: userData.email,
-        phone: userData.phone,
-        avatar: userData.avatar || "",
         role: userData.role || "user",
       };
-      return { access_token, refresh_token, user };
+      return { token, refreshToken, user };
     } catch (error) {
       throw new Error("Login failed");
     }
@@ -47,33 +45,44 @@ const authService = {
 
   // service to signup
   async signup(
-    fullName: string,
+    name: string,
     email: string,
-    phone: string,
-    password: string
+    password: string,
+    role: "user" | "admin"
   ): Promise<void> {
     const reqData = {
-      full_name: fullName,
+      name: name,
       email,
-      phone,
       password,
+      role,
     };
+    console.log(">>> check reqData signup: ", reqData);
     try {
-      await axios.post(`${API_URL}/auth/register`, reqData);
+      const res = await axios.post(`${API_URL}/auth/register`, reqData);
+      console.log(">>> check res signup: ", res);
     } catch (error) {
       throw new Error("Failed to register");
     }
   },
 
   // service to refresh token
-  async refreshToken(refreshToken: string): Promise<string> {
+  async refreshToken(refreshToken: string): Promise<{ token: string, newRefreshToken: string }> {
     try {
-      const res = await authApi().post(`/auth/refresh-token`);
-      return res.data.data.access_token;
+      const res = await axios.post(`${API_URL}/auth/refresh-token`, refreshToken);
+      return { token: res.data.token, newRefreshToken: res.data.refreshToken };
     } catch (error) {
       throw new Error("Failed to refresh token");
     }
   },
+
+  // service to logout 
+  async logout(refreshToken: string): Promise<void> {
+    try {
+      await authApi().post('/auth/logout', refreshToken);
+    } catch (error) {
+      throw new Error("Failed to logout");
+    }
+  }
 };
 
 export default authService;

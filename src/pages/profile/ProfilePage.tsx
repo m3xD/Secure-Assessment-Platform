@@ -25,9 +25,8 @@ const ProfilePage = () => {
     confirm: "",
   });
   const [profileForm, setProfileForm] = useState({
-    fullName: authState.user?.fullName || "",
+    name: authState.user?.name || "",
     email: authState.user?.email || "",
-    phone: authState.user?.phone || "",
   });
   const [passwordError, setPasswordError] = useState("");
 
@@ -37,9 +36,8 @@ const ProfilePage = () => {
       // Gọi API cập nhật thông tin người dùng
       const updatedUser = await updateUser(
         authState.user?.id || "",
-        profileForm.fullName,
+        profileForm.name,
         profileForm.email,
-        profileForm.phone,
         authState.user?.role || "user"
       );
 
@@ -82,7 +80,7 @@ const ProfilePage = () => {
       </div>
 
       <Row>
-        <Col lg={4}>
+        <Col lg={4} className="mb-4">
           <Card className="profile-card">
             <div className="profile-header">
               <div className="avatar-container">
@@ -95,7 +93,7 @@ const ProfilePage = () => {
                   <Camera size={16} />
                 </button>
               </div>
-              <h3>{authState.user?.fullName}</h3>
+              <h3>{authState.user?.name}</h3>
               <p className="role-badge">{authState.user?.role}</p>
             </div>
             <div className="profile-info">
@@ -103,10 +101,7 @@ const ProfilePage = () => {
                 <div className="info-label">Email</div>
                 <div className="info-value">{authState.user?.email}</div>
               </div>
-              <div className="info-item">
-                <div className="info-label">Phone</div>
-                <div className="info-value">{authState.user?.phone}</div>
-              </div>
+            
               <div className="info-item">
                 <div className="info-label">User ID</div>
                 <div className="info-value">{authState.user?.id}</div>
@@ -141,15 +136,15 @@ const ProfilePage = () => {
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Full Name</Form.Label>
+                      <Form.Label>Name</Form.Label>
                       <Form.Control
                         type="text"
-                        value={profileForm.fullName}
+                        value={profileForm.name}
                         disabled={!editing}
                         onChange={(e) =>
                           setProfileForm({
                             ...profileForm,
-                            fullName: e.target.value,
+                            name: e.target.value,
                           })
                         }
                       />
@@ -172,24 +167,7 @@ const ProfilePage = () => {
                     </Form.Group>
                   </Col>
                 </Row>
-                <Row>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Phone Number</Form.Label>
-                      <Form.Control
-                        type="text"
-                        value={profileForm.phone}
-                        disabled={!editing}
-                        onChange={(e) =>
-                          setProfileForm({
-                            ...profileForm,
-                            phone: e.target.value,
-                          })
-                        }
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
+                
                 {editing && (
                   <div className="d-flex justify-content-end">
                     <Button variant="primary" type="submit">

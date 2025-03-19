@@ -1,11 +1,11 @@
 import { User } from "../types/UserTypes";
 
-export const getAccessTokenFromLocalStorage = (): string | null => {
-    return localStorage.getItem("access_token");
+export const getTokenFromLocalStorage = (): string | null => {
+    return localStorage.getItem("token");
 }
 
 export const getRefreshTokenFromLocalStorage = (): string | null => {
-    return localStorage.getItem("refresh_token");
+    return localStorage.getItem("refreshToken");
 }
 
 export const getUserDataFromLocalStorage = (): User | null => {

@@ -4,7 +4,7 @@ import { Button, Modal } from "react-bootstrap";
 interface DeleteConfirmationModalProps {
   showDeleteConfirm: boolean;
   setShowDeleteConfirm: (show: boolean) => void;
-  userToDelete: { id: string; fullName: string } | null;
+  userToDelete: { id: string; name: string } | null;
   handleDeleteUser: () => void;
 }
 
@@ -22,7 +22,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
       <Modal.Body>
         <p>
           Are you sure you want to delete the user{" "}
-          <strong>{userToDelete?.fullName}</strong>?
+          <strong>{userToDelete?.name}</strong>?
         </p>
         <p className="text-danger">This action cannot be undone.</p>
       </Modal.Body>

@@ -6,16 +6,14 @@ interface UserModalProps {
   setShowModal: (show: boolean) => void;
   modalMode: "create" | "edit";
   userForm: {
-    fullName: string;
+    name: string;
     email: string;
-    phone: string;
     role: "user" | "admin";
     password: string;
   };
   formErrors: {
-    fullName: string;
+    name: string;
     email: string;
-    phone: string;
     password: string;
   };
   handleInputChange: (e: React.ChangeEvent<HTMLElement>) => void;
@@ -45,18 +43,18 @@ const UserModal: React.FC<UserModalProps> = ({
           <Row>
             <Col md={6}>
               <Form.Group className="mb-3">
-                <Form.Label>Full Name</Form.Label>
+                <Form.Label>Name</Form.Label>
                 <Form.Control
                   type="text"
-                  name="fullName"
-                  value={userForm.fullName}
+                  name="name"
+                  value={userForm.name}
                   onChange={handleInputChange}
                   onBlur={handleBlur}
-                  isInvalid={!!formErrors.fullName}
+                  isInvalid={!!formErrors.name}
                   required
                 />
                 <Form.Control.Feedback type="invalid">
-                  {formErrors.fullName}
+                  {formErrors.name}
                 </Form.Control.Feedback>
               </Form.Group>
             </Col>
@@ -79,23 +77,6 @@ const UserModal: React.FC<UserModalProps> = ({
             </Col>
           </Row>
           <Row>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>Phone</Form.Label>
-                <Form.Control
-                  type="tel"
-                  name="phone"
-                  value={userForm.phone}
-                  onChange={handleInputChange}
-                  onBlur={handleBlur}
-                  isInvalid={!!formErrors.phone}
-                  required
-                />
-                <Form.Control.Feedback type="invalid">
-                  {formErrors.phone}
-                </Form.Control.Feedback>
-              </Form.Group>
-            </Col>
             <Col md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Role</Form.Label>
@@ -140,9 +121,8 @@ const UserModal: React.FC<UserModalProps> = ({
             variant="primary"
             type="submit"
             disabled={
-              !userForm.fullName ||
+              !userForm.name ||
               !userForm.email ||
-              !userForm.phone ||
               (modalMode === "create" && !userForm.password)
             }
           >

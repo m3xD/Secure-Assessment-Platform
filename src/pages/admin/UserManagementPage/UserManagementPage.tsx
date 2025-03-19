@@ -46,7 +46,7 @@ const UserManagementPage: React.FC = () => {
 
   // Form state
   const [userForm, setUserForm] = useState({
-    fullName: "",
+    name: "",
     email: "",
     phone: "",
     password: "",
@@ -55,7 +55,7 @@ const UserManagementPage: React.FC = () => {
 
   // Form validation state
   const [formErrors, setFormErrors] = useState({
-    fullName: "",
+    name: "",
     email: "",
     phone: "",
     password: "",
@@ -118,7 +118,7 @@ const UserManagementPage: React.FC = () => {
       const searchLowerCase = searchTerm.toLowerCase();
       result = result.filter(
         (user) =>
-          user.fullName.toLowerCase().includes(searchLowerCase) ||
+          user.name.toLowerCase().includes(searchLowerCase) ||
           user.email.toLowerCase().includes(searchLowerCase) ||
           user.phone.toLowerCase().includes(searchLowerCase)
       );
@@ -135,14 +135,14 @@ const UserManagementPage: React.FC = () => {
   // Open modal for creating a new user
   const handleOpenCreateModal = () => {
     setUserForm({
-      fullName: "",
+      name: "",
       email: "",
       phone: "",
       password: "",
       role: "user",
     });
     setFormErrors({
-      fullName: "",
+      name: "",
       email: "",
       phone: "",
       password: "",
@@ -154,14 +154,14 @@ const UserManagementPage: React.FC = () => {
   // Open modal for editing an existing user
   const handleOpenEditModal = (user: UserType) => {
     setUserForm({
-      fullName: user.fullName,
+      name: user.name,
       email: user.email,
       phone: user.phone,
       password: "", // Password field is empty when editing
       role: user.role,
     });
     setFormErrors({
-      fullName: "",
+      name: "",
       email: "",
       phone: "",
       password: "",
@@ -208,10 +208,10 @@ const UserManagementPage: React.FC = () => {
     const newErrors = { ...formErrors };
     let isValid = true;
 
-    // Validate full name
-    const fullNameResult = validateField("fullName", userForm.fullName);
-    if (!fullNameResult.isValid) {
-      newErrors.fullName = fullNameResult.errorMessage || "";
+    // Validate name
+    const nameResult = validateField("name", userForm.name);
+    if (!nameResult.isValid) {
+      newErrors.name = nameResult.errorMessage || "";
       isValid = false;
     }
 
@@ -255,7 +255,7 @@ const UserManagementPage: React.FC = () => {
       if (modalMode === "create") {
         // Create new user
         const newUser = await createUser(
-          userForm.fullName,
+          userForm.name,
           userForm.email,
           userForm.phone,
           userForm.password,
@@ -268,7 +268,7 @@ const UserManagementPage: React.FC = () => {
         // Update existing user
         const updatedUser = await updateUser(
           selectedUser.id,
-          userForm.fullName,
+          userForm.name,
           userForm.email,
           userForm.phone,
           userForm.role

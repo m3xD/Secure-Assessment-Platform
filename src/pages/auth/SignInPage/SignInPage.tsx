@@ -1,14 +1,11 @@
 import React, { useState } from "react";
 import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
-import './SignInPage.scss';
+import "./SignInPage.scss";
 import { SignInFormData } from "../../../types/AuthTypes";
 import { useAuth } from "../../../hooks/useAuth";
 import { toast } from "react-toastify";
 
-
 const SignInPage: React.FC = () => {
-  const navigate = useNavigate();
   const [formData, setFormData] = useState<SignInFormData>({
     email: "",
     password: "",
@@ -16,7 +13,7 @@ const SignInPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const  {signin} = useAuth();
+  const { signin } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,8 +22,8 @@ const SignInPage: React.FC = () => {
 
     try {
       // Add your authentication logic here
-      const user = await signin(formData.email, formData.password); 
-      toast.success(`Welcome back, ${user.fullName}!`);
+      const user = await signin(formData.email, formData.password);
+      toast.success(`Welcome back, ${user.name}!`);
       // navigate("/user/exams");
     } catch (err) {
       setError("Invalid email or password");
