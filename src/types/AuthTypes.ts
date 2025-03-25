@@ -10,7 +10,6 @@ export interface SignUpFormData {
   email: string;
   password: string;
   confirmPassword: string;
-  role: "user" | "admin";
 }
 
 export interface AuthState {
@@ -28,7 +27,6 @@ export interface AuthContextType {
     name: string,
     email: string,
     password: string,
-    role: "user" | "admin"
   ) => Promise<void>;
-  refreshToken: (refreshToken: string) => Promise<void>;
+  refreshToken: (refreshToken: string) => Promise<{token: string, newRefreshToken: string}>;
 }

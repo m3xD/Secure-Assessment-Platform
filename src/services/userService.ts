@@ -25,7 +25,7 @@ const userService = {
     try {
       const res = await userApi().get(`/users/${id}`);
       console.log(">>> check res getUser: ", res);
-      const userData = res.data.data;
+      const userData = res.data;
       const user: User = {
         id: userData.id,
         name: userData.name,
@@ -60,7 +60,7 @@ const userService = {
       };
       const res = await userApi().put(`/users/${id}`, reqData);
       console.log(">>> check res updateUser: ", res);
-      const userData = res.data.data;
+      const userData = res.data;
       const user: User = {
         id: userData.id,
         name: userData.name,
@@ -88,29 +88,36 @@ const userService = {
 
   /**
    * list all users
-   * @param {number} page - Current page
-   * @param {number} pageSize - Number of pages
-   * @returns {Promise<{ users: User[]; total_page: number; total_user: number }>} - List of users, total page, total user
+   * @param {number} page - Page number
+   * @param {number} size - Page size
+   * @param {string} role - Filter users by role
+   * @param {string} search - Search users by name or email
+   * @param {string} sort - Sort field and direction
+   * @returns {Promise<any>} - List of users
    */
   async listUsers(
     page: number,
-    pageSize: number
-  ): Promise<{ users: User[]; total_page: number; total_user: number }> {
+    size: number,
+    role: string,
+    search: string,
+    sort: string
+  ): Promise<any> {
     try {
       const res = await userApi().get(
-        `/users/list?page=${page}&pageSize=${pageSize}`
+        `/users?page=${page}&size=${size}&role=${role}&search=${search}&sort=${sort}`
       );
       console.log(">>> check res listUsers: ", res);
-      const usersData = res.data.data;
-      const users: User[] = usersData.map((userData: any) => ({
-        id: userData.id,
-        name: userData.name,
-        email: userData.email,
-        role: userData.role || "user",
-      }));
-      const total_page = res.data.meta.total_page;
-      const total_user = res.data.meta.total_user;
-      return { users, total_page, total_user };
+      // const usersData = res.data.data;
+      // const users: User[] = usersData.map((userData: any) => ({
+      //   id: userData.id,
+      //   name: userData.name,
+      //   email: userData.email,
+      //   role: userData.role || "user",
+      // }));
+      // const total_page = res.data.meta.total_page;
+      // const total_user = res.data.meta.total_user;
+      // return { users, total_page, total_user };
+      return res.data;
     } catch (error) {
       throw new Error("Failed to list users");
     }
@@ -137,9 +144,9 @@ const userService = {
         password,
         role,
       };
-      const res = await userApi().post(`/users`, reqData);
+      const res = await userApi().post(`/users/`, reqData);
       console.log(">>> check res createUser: ", res);
-      const userData = res.data.data;
+      const userData = res.data;
       const user: User = {
         id: userData.id,
         name: userData.name,

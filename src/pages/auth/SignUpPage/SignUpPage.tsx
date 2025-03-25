@@ -13,7 +13,6 @@ const SignUpPage: React.FC = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    role: 'user'
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -33,7 +32,7 @@ const SignUpPage: React.FC = () => {
 
     try {
       // Add your registration logic here
-      await signup(formData.name, formData.email, formData.password, formData.role);
+      await signup(formData.name, formData.email, formData.password);
       toast.success("Account created successfully. Please sign in.");
       navigate("/signin");
     } catch (err) {
@@ -111,7 +110,7 @@ const SignUpPage: React.FC = () => {
                 />
               </Form.Group>
 
-              <Form.Group className="mb-4">
+              {/* <Form.Group className="mb-4">
                 <Form.Label>I am a</Form.Label>
                 <div>
                   <Form.Check
@@ -135,7 +134,7 @@ const SignUpPage: React.FC = () => {
                     }
                   />
                 </div>
-              </Form.Group>
+              </Form.Group> */}
 
               <Button
                 variant="primary"

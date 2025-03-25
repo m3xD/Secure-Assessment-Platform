@@ -48,13 +48,11 @@ const authService = {
     name: string,
     email: string,
     password: string,
-    role: "user" | "admin"
   ): Promise<void> {
     const reqData = {
       name: name,
       email,
       password,
-      role,
     };
     console.log(">>> check reqData signup: ", reqData);
     try {
@@ -68,7 +66,11 @@ const authService = {
   // service to refresh token
   async refreshToken(refreshToken: string): Promise<{ token: string, newRefreshToken: string }> {
     try {
-      const res = await axios.post(`${API_URL}/auth/refresh-token`, refreshToken);
+      const reqData = {
+        refreshToken: refreshToken
+      }
+      const res = await axios.post(`${API_URL}/auth/refresh`, reqData);
+      console.log(">>> check res refreshToken: ", res);
       return { token: res.data.token, newRefreshToken: res.data.refreshToken };
     } catch (error) {
       throw new Error("Failed to refresh token");

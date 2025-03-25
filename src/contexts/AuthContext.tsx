@@ -3,14 +3,13 @@ import { AuthContextType, AuthState } from "../types/AuthTypes";
 import authService from "../services/authService";
 import { getUserIDFromToken, isTokenExpired } from "../utils/jwtUtils";
 import userService from "../services/userService";
-
+import { toast } from "react-toastify";
 
 export const AuthContext = createContext<AuthContextType | undefined>(
   undefined
 );
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-
   const [authState, setAuthState] = useState<AuthState>(() => {
     // Initialize authState from localStorage on component mount
     // This prevents the initial "loading" state from causing flickering
@@ -44,7 +43,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        setAuthState(prev => ({
+        setAuthState((prev) => ({
           ...prev,
           user: null,
           isAuthenticated: false,
@@ -56,31 +55,36 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // If token is expired, try to refresh
       if (isTokenExpired(token)) {
         console.log("Token expired, attempting refresh");
+        toast.warn("Token expired, refreshing...");
+        localStorage.removeItem("token");
+        localStorage.removeItem("userData");
         try {
           const refreshTokenValue = localStorage.getItem("refreshToken");
           if (!refreshTokenValue) {
             throw new Error("No refresh token available");
           }
-          
+
           // Await the token refresh
-          await refreshToken(refreshTokenValue);
-          
+          const res = await refreshToken(refreshTokenValue);
+          localStorage.setItem("token", res.token);
+          localStorage.setItem("refreshToken", res.newRefreshToken);
+
           // After refresh, get the new token and fetch user data
           const newToken = localStorage.getItem("token");
           if (!newToken) {
             throw new Error("Token refresh failed");
           }
-          
+
           const userId = getUserIDFromToken(newToken);
           if (!userId) {
             throw new Error("Invalid token after refresh");
           }
-          
+
           // Fetch user data with the new token
           const user = await userService.getUser(userId);
           localStorage.setItem("userData", JSON.stringify(user));
-          
-          setAuthState(prev => ({
+
+          setAuthState((prev) => ({
             ...prev,
             user,
             isAuthenticated: true,
@@ -91,7 +95,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           localStorage.removeItem("token");
           localStorage.removeItem("refreshToken");
           localStorage.removeItem("userData");
-          
+
           setAuthState({
             user: null,
             isAuthenticated: false,
@@ -152,7 +156,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       localStorage.removeItem("userData");
       localStorage.removeItem("refreshToken");
     }
-  }, []);  // Add proper dependencies
+  }, []); // Add proper dependencies
 
   // Only run checkAuth once during initial component mount
   useEffect(() => {
@@ -197,14 +201,9 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
-  const signup = async (
-    name: string,
-    email: string,
-    password: string,
-    role: "user" | "admin"
-  ) => {
+  const signup = async (name: string, email: string, password: string) => {
     try {
-      await authService.signup(name, email, password, role);
+      await authService.signup(name, email, password);
     } catch (error) {
       throw new Error("Signup failed");
     }
@@ -212,9 +211,13 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const refreshToken = async (refreshToken: string) => {
     try {
-      const { token, newRefreshToken } = await authService.refreshToken(refreshToken);
-      localStorage.setItem("token", token);
-      localStorage.setItem("refreshToken", newRefreshToken);
+      const { token, newRefreshToken } = await authService.refreshToken(
+        refreshToken
+      );
+      return {
+        token,
+        newRefreshToken,
+      }
     } catch (error) {
       throw new Error("Failed to refresh token");
     }

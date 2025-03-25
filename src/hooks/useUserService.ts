@@ -20,12 +20,7 @@ export const useUserService = () => {
     role: "user" | "admin"
   ) => {
     try {
-      const updatedUser = await userService.updateUser(
-        id,
-        name,
-        email,
-        role
-      );
+      const updatedUser = await userService.updateUser(id, name, email, role);
       if (updatedUser.id === authState.user?.id) {
         localStorage.setItem("userData", JSON.stringify(updatedUser));
         setAuthState((prev) => ({
@@ -47,9 +42,15 @@ export const useUserService = () => {
     }
   };
 
-  const listUsers = async (page: number, pageSize: number) => {
+  const listUsers = async (
+    page: number,
+    size: number,
+    role: string,
+    search: string,
+    sort: string
+  ) => {
     try {
-      const res = await userService.listUsers(page, pageSize);
+      const res = await userService.listUsers(page, size, role, search, sort);
       return res;
     } catch (error) {
       throw new Error("Failed to list users");
@@ -63,12 +64,7 @@ export const useUserService = () => {
     role: "user" | "admin"
   ) => {
     try {
-      const user = await userService.createUser(
-        name,
-        email,
-        password,
-        role
-      );
+      const user = await userService.createUser(name, email, password, role);
       return user;
     } catch (error) {
       throw new Error("Failed to create new user");

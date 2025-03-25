@@ -10,14 +10,11 @@ import SignUpPage from "./pages/auth/SignUpPage/SignUpPage";
 import SignInPage from "./pages/auth/SignInPage/SignInPage";
 import Header from "./components/Header/Header";
 import { useAuth } from "./hooks/useAuth";
-import QuizTakingPage from "./pages/user/QuizTakingPage/QuizTakingPage";
-import ExamListPage from "./pages/user/ExamListPage/ExamListPage";
-import QuizManagementPage from "./pages/admin/QuizManagementPage/QuizManagementPage";
 import ToastComponent from "./components/Toast/ToastComponent";
 import UserDashboard from "./pages/user/UserDashboard/UserDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard/AdminDashboard";
 import ProfilePage from "./pages/profile/ProfilePage";
-import UserManagementPage from "./pages/admin/UserManagementPage/UserManagementPage";
+import UserManagement from "./pages/admin/UserManagement/UserManagement";
 
 // Create a protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -103,36 +100,13 @@ function App() {
         />
 
         {/* User routes - protected */}
-        <Route
-          path="/user/exams"
-          element={
-            <ProtectedRoute>
-              {authState.user?.role === "user" ? (
-                <ExamListPage />
-              ) : (
-                <Navigate to="/" />
-              )}
-            </ProtectedRoute>
-          }
-        />
+
         <Route
           path="/user/dashboard"
           element={
             <ProtectedRoute>
               {authState.user?.role === "user" ? (
                 <UserDashboard />
-              ) : (
-                <Navigate to="/" />
-              )}
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/user/quiz/:id"
-          element={
-            <ProtectedRoute>
-              {authState.user?.role === "user" ? (
-                <QuizTakingPage />
               ) : (
                 <Navigate to="/" />
               )}
@@ -158,19 +132,7 @@ function App() {
           element={
             <ProtectedRoute>
               {authState.user?.role === "admin" ? (
-                <UserManagementPage />
-              ) : (
-                <Navigate to="/" />
-              )}
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/quizzes"
-          element={
-            <ProtectedRoute>
-              {authState.user?.role === "admin" ? (
-                <QuizManagementPage />
+                <UserManagement />
               ) : (
                 <Navigate to="/" />
               )}

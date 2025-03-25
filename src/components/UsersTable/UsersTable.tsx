@@ -1,11 +1,12 @@
 import React from "react";
 import { Badge, Button, Card, Form, Pagination, Spinner, Table } from "react-bootstrap";
-import { Edit2, Trash2, User } from "react-feather";
+import { Edit2, Trash2, User, ArrowUp, ArrowDown } from "react-feather";
 import { User as UserType } from "../../types/UserTypes";
+import './UsersTable.scss';
 
 interface UsersTableProps {
   loading: boolean;
-  filteredUsers: UserType[];
+  users: UserType[];
   searchTerm: string;
   roleFilter: string;
   totalUsers: number;
@@ -17,11 +18,13 @@ interface UsersTableProps {
   handlePageChange: (pageNumber: number) => void;
   setPageSize: (pageSize: number) => void;
   setCurrentPage: (pageNumber: number) => void;
+  handleSort?: (field: string) => void;
+  sortField?: string;
 }
 
 const UsersTable: React.FC<UsersTableProps> = ({
   loading,
-  filteredUsers,
+  users,
   searchTerm,
   roleFilter,
   totalUsers,
@@ -33,7 +36,24 @@ const UsersTable: React.FC<UsersTableProps> = ({
   handlePageChange,
   setPageSize,
   setCurrentPage,
+  handleSort,
+  sortField,
 }) => {
+  const sortColumn = (field: string) => {
+    if (!sortField) return '';
+    return sortField === field || sortField === `-${field}` ? 'sortable sorted' : 'sortable';
+  };
+
+  const sortIcon = (field: string) => {
+    if (!sortField) return null;
+    if (sortField === field) {
+      return <ArrowUp size={14} className="ms-1" />;
+    } else if (sortField === `-${field}`) {
+      return <ArrowDown size={14} className="ms-1" />;
+    }
+    return null;
+  };
+
   return (
     <Card className="users-table-card">
       <Card.Body>
@@ -42,7 +62,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
             <Spinner animation="border" variant="primary" />
             <p className="mt-3">Loading users...</p>
           </div>
-        ) : filteredUsers.length === 0 ? (
+        ) : users.length === 0 ? (
           <div className="text-center my-5">
             <User size={48} className="text-muted mb-3" />
             <h5>No users found</h5>
@@ -57,14 +77,20 @@ const UsersTable: React.FC<UsersTableProps> = ({
             <Table responsive hover className="users-table">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Role</th>
+                  <th onClick={() => handleSort && handleSort('name')} className={sortColumn('name')}>
+                    Name {sortIcon('name')}
+                  </th>
+                  <th onClick={() => handleSort && handleSort('email')} className={sortColumn('email')}>
+                    Email {sortIcon('email')}
+                  </th>
+                  <th onClick={() => handleSort && handleSort('role')} className={sortColumn('role')}>
+                    Role {sortIcon('role')}
+                  </th>
                   <th className="text-center">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredUsers.map((user) => (
+                {users.map((user) => (
                   <tr key={user.id}>
                     <td>{user.name}</td>
                     <td>{user.email}</td>

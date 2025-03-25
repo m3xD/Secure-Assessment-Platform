@@ -22,7 +22,7 @@ import UserModal from "../../../components/UserModal/UserModal";
 import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal/DeleteConfirmationModal";
 import { useUserService } from "../../../hooks/useUserService";
 
-const UserManagementPage: React.FC = () => {
+const UserManagement: React.FC = () => {
   // Auth context for user operations
   const { createUser, updateUser, deleteUser, listUsers } = useUserService();
 
@@ -34,7 +34,6 @@ const UserManagementPage: React.FC = () => {
 
   // State management
   const [users, setUsers] = useState<UserType[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<UserType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -48,7 +47,6 @@ const UserManagementPage: React.FC = () => {
   const [userForm, setUserForm] = useState({
     name: "",
     email: "",
-    phone: "",
     password: "",
     role: "user" as "user" | "admin",
   });
@@ -57,44 +55,49 @@ const UserManagementPage: React.FC = () => {
   const [formErrors, setFormErrors] = useState({
     name: "",
     email: "",
-    phone: "",
     password: "",
   });
 
   // Filter state
   const [roleFilter, setRoleFilter] = useState<"all" | "user" | "admin">("all");
 
+  // Add a sort state
+  const [sortField, setSortField] = useState<string>("");
+
   // Fetch users on component mount or when pagination changes
   useEffect(() => {
     fetchUsers();
-  }, [currentPage, pageSize]);
-
-  // Apply filters when users or search term changes
-  useEffect(() => {
-    filterUsers();
-  }, [users, searchTerm, roleFilter]);
+  }, [currentPage, pageSize, searchTerm, roleFilter, sortField]);
 
   // Fetch users from API
   const fetchUsers = async () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await listUsers(currentPage, pageSize);
 
-      // Kiểm tra kỹ response
+      // Convert "all" to empty string for the API
+      const apiRoleFilter = roleFilter === "all" ? "" : roleFilter;
+
+      // Include sort parameter in API call - fix the page index conversion
+      const res = await listUsers(
+        currentPage - 1, // Subtract 1 from currentPage without reassigning
+        pageSize,
+        apiRoleFilter, // Use the converted role filter
+        searchTerm || "",
+        sortField
+      );
+
       console.log(">>> Full response from listUsers:", res);
-      console.log(">>> Users array:", res.users);
-      console.log(">>> Total user:", res.total_user);
-      console.log(">>> Total page:", res.total_page);
 
-      if (!res.users || res.users.length === 0) {
-        console.warn("Empty users array returned from API");
-      }
+      // The response structure now has data (users array) and meta objects
+      const users = res.content || [];
+      const totalUser = res.totalElements || 0;
+      const totalPage = res.totalPages || 1;
 
-      setUsers(res.users || []);
-      setFilteredUsers(res.users || []);
-      setTotalUsers(res.total_user || 0);
-      setTotalPages(res.total_page || 1);
+      // Set the users array and pagination info
+      setUsers(users);
+      setTotalUsers(totalUser);
+      setTotalPages(totalPage);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to fetch users";
@@ -109,42 +112,17 @@ const UserManagementPage: React.FC = () => {
     setCurrentPage(page);
   };
 
-  // Filter users based on search term and role filter
-  const filterUsers = () => {
-    let result = [...users];
-
-    // Apply search filter
-    if (searchTerm) {
-      const searchLowerCase = searchTerm.toLowerCase();
-      result = result.filter(
-        (user) =>
-          user.name.toLowerCase().includes(searchLowerCase) ||
-          user.email.toLowerCase().includes(searchLowerCase) ||
-          user.phone.toLowerCase().includes(searchLowerCase)
-      );
-    }
-
-    // Apply role filter
-    if (roleFilter !== "all") {
-      result = result.filter((user) => user.role === roleFilter);
-    }
-
-    setFilteredUsers(result);
-  };
-
   // Open modal for creating a new user
   const handleOpenCreateModal = () => {
     setUserForm({
       name: "",
       email: "",
-      phone: "",
       password: "",
       role: "user",
     });
     setFormErrors({
       name: "",
       email: "",
-      phone: "",
       password: "",
     });
     setModalMode("create");
@@ -156,14 +134,12 @@ const UserManagementPage: React.FC = () => {
     setUserForm({
       name: user.name,
       email: user.email,
-      phone: user.phone,
       password: "", // Password field is empty when editing
       role: user.role,
     });
     setFormErrors({
       name: "",
       email: "",
-      phone: "",
       password: "",
     });
     setSelectedUser(user);
@@ -222,13 +198,6 @@ const UserManagementPage: React.FC = () => {
       isValid = false;
     }
 
-    // Validate phone
-    const phoneResult = validateField("phone", userForm.phone);
-    if (!phoneResult.isValid) {
-      newErrors.phone = phoneResult.errorMessage || "";
-      isValid = false;
-    }
-
     // Validate password (only required when creating a new user)
     if (modalMode === "create") {
       const passwordResult = validateField("password", userForm.password);
@@ -257,7 +226,6 @@ const UserManagementPage: React.FC = () => {
         const newUser = await createUser(
           userForm.name,
           userForm.email,
-          userForm.phone,
           userForm.password,
           userForm.role
         );
@@ -270,7 +238,6 @@ const UserManagementPage: React.FC = () => {
           selectedUser.id,
           userForm.name,
           userForm.email,
-          userForm.phone,
           userForm.role
         );
 
@@ -305,6 +272,21 @@ const UserManagementPage: React.FC = () => {
     } catch (error) {
       console.error("Error deleting user:", error);
       toast.error("Failed to delete user. Please try again.");
+    }
+  };
+
+  // Add a function to handle sorting
+  const handleSort = (field: string) => {
+    // Toggle between ascending, descending, and no sort
+    if (sortField === field) {
+      // Currently ascending, switch to descending
+      setSortField(`-${field}`);
+    } else if (sortField === `-${field}`) {
+      // Currently descending, clear sort
+      setSortField("");
+    } else {
+      // No sort or different field, sort ascending
+      setSortField(field);
     }
   };
 
@@ -381,7 +363,7 @@ const UserManagementPage: React.FC = () => {
       {/* Users Table */}
       <UsersTable
         loading={loading}
-        filteredUsers={filteredUsers}
+        users={users}
         searchTerm={searchTerm}
         roleFilter={roleFilter}
         totalUsers={totalUsers}
@@ -393,6 +375,8 @@ const UserManagementPage: React.FC = () => {
         handlePageChange={handlePageChange}
         setPageSize={setPageSize}
         setCurrentPage={setCurrentPage}
+        handleSort={handleSort}
+        sortField={sortField}
       />
 
       {/* Create/Edit User Modal */}
@@ -418,4 +402,4 @@ const UserManagementPage: React.FC = () => {
   );
 };
 
-export default UserManagementPage;
+export default UserManagement;

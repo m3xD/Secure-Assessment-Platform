@@ -222,6 +222,20 @@ const assessmentsService = {
       throw new Error("Failed to get assessment statistics");
     }
   },
+
+  /**
+   * Get result for an assessment
+   * @param {string} id - Assessment ID
+   * @returns {Promise<any>} - Returns assessment result
+   */
+  async getAssessmentResult(id: string): Promise<any> {
+    try {
+      const res = await assessmentsApi().get(`/assessments/${id}/results`);
+      return res.data;
+    } catch (error) {
+      throw new Error("Failed to get assessment result");
+    }
+  }
 };
 
 export default assessmentsService;
