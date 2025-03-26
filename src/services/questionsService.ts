@@ -1,18 +1,5 @@
-import axios from "axios";
-import { getTokenFromLocalStorage } from "../utils/localStorageUtils";
 import { Question, QuestionData } from "../types/QuestionTypes";
-
-const API_URL = "https://main-backend-f59ecff5cbde.herokuapp.com";
-
-const questionsApi = () => {
-  const token = getTokenFromLocalStorage();
-  return axios.create({
-    baseURL: API_URL,
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-};
+import { mainApi } from "../utils/AxiosInterceptor";
 
 const questionsService = {
   /**
@@ -22,7 +9,7 @@ const questionsService = {
    */
   async getAssessmentQuestions(id: string) {
     try {
-      const res = await questionsApi().get(`/assessments/${id}/questions`);
+      const res = await mainApi.get(`/assessments/${id}/questions`);
       const questions: Question[] = res.data;
       return questions;
     } catch (error) {
@@ -38,7 +25,7 @@ const questionsService = {
    */
   async addQuestion(id: string, questionData: QuestionData): Promise<Question> {
     try {
-      const res = await questionsApi().post(
+      const res = await mainApi.post(
         `/assessments/${id}/questions`,
         questionData
       );
@@ -62,7 +49,7 @@ const questionsService = {
     questionData: QuestionData
   ): Promise<Question> {
     try {
-      const res = await questionsApi().put(
+      const res = await mainApi.put(
         `/assessments/${assessmentId}/questions/${questionId}`,
         questionData
       );
@@ -84,7 +71,7 @@ const questionsService = {
     questionId: string
   ): Promise<void> {
     try {
-      await questionsApi().delete(
+      await mainApi.delete(
         `/assessments/${assessmentId}/questions/${questionId}`
       );
     } catch (error) {

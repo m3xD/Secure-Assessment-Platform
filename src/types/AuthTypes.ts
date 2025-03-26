@@ -22,7 +22,7 @@ export interface AuthContextType {
   authState: AuthState;
   setAuthState: React.Dispatch<React.SetStateAction<AuthState>>;
   signin: (email: string, password: string) => Promise<User>;
-  logout: () => void;
+  logout: (refreshToken: string) => void;
   signup: (
     name: string,
     email: string,

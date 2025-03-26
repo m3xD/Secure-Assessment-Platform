@@ -1,26 +1,15 @@
+import { authApi } from "./../utils/AxiosInterceptor";
 import axios from "axios";
 import { User } from "../types/UserTypes";
-import { getTokenFromLocalStorage } from "../utils/localStorageUtils";
 
 const API_URL = "https://auth-service-6f3ceb0b5b52.herokuapp.com";
-
-// create an axios instance with auth headers
-const authApi = () => {
-  const token = getTokenFromLocalStorage();
-  return axios.create({
-    baseURL: API_URL,
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-};
 
 const authService = {
   // service to signin
   async signin(
     email: string,
     password: string
-  ): Promise<{ token: string, refreshToken: string, user: User }> {
+  ): Promise<{ token: string; refreshToken: string; user: User }> {
     try {
       const reqData = {
         email,
@@ -44,11 +33,7 @@ const authService = {
   },
 
   // service to signup
-  async signup(
-    name: string,
-    email: string,
-    password: string,
-  ): Promise<void> {
+  async signup(name: string, email: string, password: string): Promise<void> {
     const reqData = {
       name: name,
       email,
@@ -64,11 +49,13 @@ const authService = {
   },
 
   // service to refresh token
-  async refreshToken(refreshToken: string): Promise<{ token: string, newRefreshToken: string }> {
+  async refreshToken(
+    refreshToken: string
+  ): Promise<{ token: string; newRefreshToken: string }> {
     try {
       const reqData = {
-        refreshToken: refreshToken
-      }
+        refreshToken: refreshToken,
+      };
       const res = await axios.post(`${API_URL}/auth/refresh`, reqData);
       console.log(">>> check res refreshToken: ", res);
       return { token: res.data.token, newRefreshToken: res.data.refreshToken };
@@ -77,14 +64,19 @@ const authService = {
     }
   },
 
-  // service to logout 
-  async logout(refreshToken: string): Promise<void> {
+  /**
+   * Invalidates the refresh token
+   * @param {string} refreshToken - Refresh token
+   * @returns {Promise<any>} - Returns the response
+   */
+  async logout(refreshToken: string): Promise<any> {
     try {
-      await authApi().post('/auth/logout', refreshToken);
+      const res = await authApi.post("/auth/logout", {refreshToken});
+      return res;
     } catch (error) {
       throw new Error("Failed to logout");
     }
-  }
+  },
 };
 
 export default authService;

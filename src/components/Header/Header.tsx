@@ -3,13 +3,17 @@ import { Container, Navbar, Nav, NavDropdown } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import "./Header.scss";
 import { useAuth } from "../../hooks/useAuth";
+import { getRefreshTokenFromLocalStorage } from "../../utils/localStorageUtils";
 
 const Header: React.FC = () => {
   const { authState, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    logout();
+    logout(getRefreshTokenFromLocalStorage() || "");
+    localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("userData");
     navigate("/signin");
   };
 
@@ -32,7 +36,7 @@ const Header: React.FC = () => {
                   <>
                     <Nav.Link href="/admin/dashboard">Dashboard</Nav.Link>
                     <Nav.Link href="/admin/quizzes">Manage Quizzes</Nav.Link>
-                    <Nav.Link href="/admin/users">Manage User</Nav.Link>               
+                    <Nav.Link href="/admin/users">Manage User</Nav.Link>
                   </>
                 )}
               </Nav>

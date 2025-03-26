@@ -6,20 +6,8 @@ import {
   SubmitAssessmentResponse,
   WebcamEvent,
 } from "./../types/StudentServiceTypes";
-import axios from "axios";
-import { getTokenFromLocalStorage } from "../utils/localStorageUtils";
 
-const API_URL = "https://main-backend-f59ecff5cbde.herokuapp.com";
-
-const studentApi = () => {
-  const token = getTokenFromLocalStorage();
-  return axios.create({
-    baseURL: API_URL,
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-};
+import { mainApi } from "../utils/AxiosInterceptor";
 
 const studentService = {
   /**
@@ -30,7 +18,7 @@ const studentService = {
    */
   async getAvailableAssessments(page: number, size: number): Promise<any> {
     try {
-      const res = await studentApi().get(
+      const res = await mainApi.get(
         `/student/assessments/available?page=${page}&size=${size}`
       );
       return res.data;
@@ -46,7 +34,7 @@ const studentService = {
    */
   async startAssessment(id: string): Promise<StartAssessment> {
     try {
-      const res = await studentApi().post(`/student/assessments/${id}/start`);
+      const res = await mainApi.post(`/student/assessments/${id}/start`);
       const startAssessmentData: StartAssessment = res.data;
       return startAssessmentData;
     } catch (error) {
@@ -61,7 +49,7 @@ const studentService = {
    */
   async getAssessmentResultsHistory(id: string): Promise<AssessmentResult[]> {
     try {
-      const res = await studentApi().get(`/student/assessments/${id}/results`);
+      const res = await mainApi.get(`/student/assessments/${id}/results`);
       const assessmentResultHistoryData: AssessmentResult[] = res.data;
       return assessmentResultHistoryData;
     } catch (error) {
@@ -76,7 +64,7 @@ const studentService = {
    */
   async getAttemptDetails(attemptId: string): Promise<Attempt> {
     try {
-      const res = await studentApi().get(`/student/attempts/${attemptId}`);
+      const res = await mainApi.get(`/student/attempts/${attemptId}`);
       const attemptData: Attempt = res.data;
       return attemptData;
     } catch (error) {
@@ -92,7 +80,7 @@ const studentService = {
    */
   async saveAnswer(attemptId: string, answerData: Answer): Promise<any> {
     try {
-      const res = await studentApi().post(
+      const res = await mainApi.post(
         `/student/attempts/${attemptId}/asnwers`,
         answerData
       );
@@ -109,9 +97,7 @@ const studentService = {
    */
   async submitAssessment(attemptId: string): Promise<SubmitAssessmentResponse> {
     try {
-      const res = await studentApi().post(
-        `/student/attempts/${attemptId}/submit`
-      );
+      const res = await mainApi.post(`/student/attempts/${attemptId}/submit`);
       const submitAssessmentData: SubmitAssessmentResponse = res.data;
       return submitAssessmentData;
     } catch (error) {
@@ -130,7 +116,7 @@ const studentService = {
     webcamEventData: WebcamEvent
   ): Promise<{ received: boolean; severity: string; message: string }> {
     try {
-      const res = await studentApi().post(
+      const res = await mainApi.post(
         `/student/attempts/${attemptId}/monitor`,
         webcamEventData
       );

@@ -3,21 +3,9 @@ import {
   AssessmentSettings,
   AsssessmentsStatistics,
 } from "./../types/AssessmentTypes";
-import axios from "axios";
-import { getTokenFromLocalStorage } from "../utils/localStorageUtils";
+
 import { Assessment, AssessmentData } from "../types/AssessmentTypes";
-
-const API_URL = "https://main-backend-f59ecff5cbde.herokuapp.com";
-
-const assessmentsApi = () => {
-  const token = getTokenFromLocalStorage();
-  return axios.create({
-    baseURL: API_URL,
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-};
+import { mainApi } from "../utils/AxiosInterceptor";
 
 const assessmentsService = {
   /**
@@ -39,7 +27,7 @@ const assessmentsService = {
     sort: string
   ): Promise<any> {
     try {
-      const res = await assessmentsApi().get(
+      const res = await mainApi.get(
         `/assessments/?=${page}&size=${size}&subject=${subject}&status=${status}&search=${search}&sort=${sort}`
       );
       return res.data;
@@ -57,7 +45,7 @@ const assessmentsService = {
     assessmentData: AssessmentData
   ): Promise<AssessmentDetails> {
     try {
-      const res = await assessmentsApi().post("/assessments", assessmentData);
+      const res = await mainApi.post("/assessments", assessmentData);
       const newAssessment: AssessmentDetails = res.data;
       return newAssessment;
     } catch (error) {
@@ -72,7 +60,7 @@ const assessmentsService = {
    */
   async getAssessmentById(id: string): Promise<AssessmentDetails> {
     try {
-      const res = await assessmentsApi().get(`/assessments/${id}`);
+      const res = await mainApi.get(`/assessments/${id}`);
       const assessment: AssessmentDetails = res.data;
       return assessment;
     } catch (error) {
@@ -91,10 +79,7 @@ const assessmentsService = {
     assessmentData: AssessmentData
   ): Promise<AssessmentDetails> {
     try {
-      const res = await assessmentsApi().put(
-        `/assessments/${id}`,
-        assessmentData
-      );
+      const res = await mainApi.put(`/assessments/${id}`, assessmentData);
       const updatedAssessment: AssessmentDetails = res.data;
       return updatedAssessment;
     } catch (error) {
@@ -109,7 +94,7 @@ const assessmentsService = {
    */
   async deleteAssessment(id: string): Promise<void> {
     try {
-      await assessmentsApi().delete(`/assessments/${id}`);
+      await mainApi.delete(`/assessments/${id}`);
     } catch (error) {
       throw new Error("Failed to delete assessment");
     }
@@ -138,10 +123,7 @@ const assessmentsService = {
         copySettings,
         setAsDraft,
       };
-      const res = await assessmentsApi().post(
-        `/assessments/${id}/duplicate`,
-        reqData
-      );
+      const res = await mainApi.post(`/assessments/${id}/duplicate`, reqData);
       const duplicatedAssessment: Assessment = res.data;
       return duplicatedAssessment;
     } catch (error) {
@@ -160,10 +142,7 @@ const assessmentsService = {
     settings: AssessmentSettings
   ): Promise<any> {
     try {
-      const res = await assessmentsApi().put(
-        `/assessments/${id}/settings`,
-        settings
-      );
+      const res = await mainApi.put(`/assessments/${id}/settings`, settings);
       return res.data;
     } catch (error) {
       throw new Error("Failed to update assessment settings");
@@ -179,7 +158,7 @@ const assessmentsService = {
     id: string
   ): Promise<{ id: string; title: string; status: string; updatedAt: string }> {
     try {
-      const res = await assessmentsApi().post(`/assessments/${id}/publish`);
+      const res = await mainApi.post(`/assessments/${id}/publish`);
       const resResult = {
         id: res.data.id,
         title: res.data.title,
@@ -199,9 +178,7 @@ const assessmentsService = {
    */
   async getRecentAssessments(limit: number): Promise<Assessment[]> {
     try {
-      const res = await assessmentsApi().get(
-        `/assessments/recent/?limit=${limit}`
-      );
+      const res = await mainApi.get(`/assessments/recent/?limit=${limit}`);
       const assessments: Assessment[] = res.data;
       return assessments;
     } catch (error) {
@@ -215,7 +192,7 @@ const assessmentsService = {
    */
   async getAssessmentsStatistics(): Promise<AsssessmentsStatistics> {
     try {
-      const res = await assessmentsApi().get("/assessments/statistics");
+      const res = await mainApi.get("/assessments/statistics");
       const statisticsData: AsssessmentsStatistics = res.data;
       return statisticsData;
     } catch (error) {
@@ -230,12 +207,12 @@ const assessmentsService = {
    */
   async getAssessmentResult(id: string): Promise<any> {
     try {
-      const res = await assessmentsApi().get(`/assessments/${id}/results`);
+      const res = await mainApi.get(`/assessments/${id}/results`);
       return res.data;
     } catch (error) {
       throw new Error("Failed to get assessment result");
     }
-  }
+  },
 };
 
 export default assessmentsService;

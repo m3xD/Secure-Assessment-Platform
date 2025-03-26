@@ -1,27 +1,14 @@
-import axios from "axios";
-import { getTokenFromLocalStorage } from "../utils/localStorageUtils";
 import { AssessmentPerformance, UserActivity } from "../types/AnalyticTypes";
-
-const API_URL = "https://main-backend-f59ecff5cbde.herokuapp.com";
-
-const analyticsApi = () => {
-  const token = getTokenFromLocalStorage();
-  return axios.create({
-    baseURL: API_URL,
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-};
+import { mainApi } from "../utils/AxiosInterceptor";
 
 const analyticsService = {
   /**
    * Returns aggregated analytics on user activity
-   * @returns {Promise<UserActivity>} Promise object represents the analytics data  
+   * @returns {Promise<UserActivity>} Promise object represents the analytics data
    */
   async getUserActivityAnalytics(): Promise<UserActivity> {
     try {
-      const res = await analyticsApi().get('/analytics/user-activity');
+      const res = await mainApi.get("/analytics/user-activity");
       const userActivitData: UserActivity = res.data;
       return userActivitData;
     } catch (error) {
@@ -35,7 +22,7 @@ const analyticsService = {
    */
   async getAssessmentPerformanceAnalytics(): Promise<AssessmentPerformance> {
     try {
-      const res = await analyticsApi().get('/analytics/assessment-performance');
+      const res = await mainApi.get("/analytics/assessment-performance");
       const assessmentPerformanceData: AssessmentPerformance = res.data;
       return assessmentPerformanceData;
     } catch (error) {
@@ -44,7 +31,7 @@ const analyticsService = {
   },
 
   /**
-   * 
+   *
    */
 };
 export default analyticsService;

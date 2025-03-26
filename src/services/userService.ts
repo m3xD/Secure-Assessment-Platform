@@ -1,19 +1,5 @@
-import axios from "axios";
 import { User } from "../types/UserTypes";
-import { getTokenFromLocalStorage } from "../utils/localStorageUtils";
-
-const API_URL = "https://auth-service-6f3ceb0b5b52.herokuapp.com";
-
-// create an axios instance with auth headers
-const userApi = () => {
-  const token = getTokenFromLocalStorage();
-  return axios.create({
-    baseURL: API_URL,
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-};
+import { authApi } from "../utils/AxiosInterceptor";
 
 const userService = {
   /**
@@ -23,7 +9,7 @@ const userService = {
    */
   async getUser(id: string): Promise<User> {
     try {
-      const res = await userApi().get(`/users/${id}`);
+      const res = await authApi.get(`/users/${id}`);
       console.log(">>> check res getUser: ", res);
       const userData = res.data;
       const user: User = {
@@ -58,7 +44,7 @@ const userService = {
         email,
         role,
       };
-      const res = await userApi().put(`/users/${id}`, reqData);
+      const res = await authApi.put(`/users/${id}`, reqData);
       console.log(">>> check res updateUser: ", res);
       const userData = res.data;
       const user: User = {
@@ -80,7 +66,7 @@ const userService = {
    */
   async deleteUser(id: string): Promise<void> {
     try {
-      await userApi().delete(`/users/${id}`);
+      await authApi.delete(`/users/${id}`);
     } catch (error) {
       throw new Error("Failed to delete user");
     }
@@ -103,7 +89,7 @@ const userService = {
     sort: string
   ): Promise<any> {
     try {
-      const res = await userApi().get(
+      const res = await authApi.get(
         `/users?page=${page}&size=${size}&role=${role}&search=${search}&sort=${sort}`
       );
       console.log(">>> check res listUsers: ", res);
@@ -144,7 +130,7 @@ const userService = {
         password,
         role,
       };
-      const res = await userApi().post(`/users/`, reqData);
+      const res = await authApi.post(`/users/`, reqData);
       console.log(">>> check res createUser: ", res);
       const userData = res.data;
       const user: User = {
@@ -173,7 +159,7 @@ const userService = {
     }
   ): Promise<void> {
     try {
-      await userApi().post(`/users/${id}/change-password`, passwordData);
+      await authApi.post(`/users/${id}/change-password`, passwordData);
     } catch (error) {
       throw new Error("Failed to change password");
     }
