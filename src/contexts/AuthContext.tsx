@@ -1,9 +1,9 @@
 import React, { createContext, useEffect, useState, useCallback } from "react";
 import { AuthContextType, AuthState } from "../types/AuthTypes";
 import authService from "../services/authService";
-import { getUserIDFromToken, isTokenExpired } from "../utils/jwtUtils";
+import { getUserIDFromToken } from "../utils/jwtUtils";
 import userService from "../services/userService";
-import { toast } from "react-toastify";
+
 
 export const AuthContext = createContext<AuthContextType | undefined>(
   undefined

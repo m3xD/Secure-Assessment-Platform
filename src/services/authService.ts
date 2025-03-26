@@ -5,7 +5,12 @@ import { User } from "../types/UserTypes";
 const API_URL = "https://auth-service-6f3ceb0b5b52.herokuapp.com";
 
 const authService = {
-  // service to signin
+  /**
+   * Authenticates a user and returns tokens
+   * @param {string} email - Email
+   * @param {string} password - Password
+   * @returns {Promise<{token: string, refreshToken: string, user: User}>} - Returns the token, refresh token, and user
+   */
   async signin(
     email: string,
     password: string
@@ -32,7 +37,13 @@ const authService = {
     }
   },
 
-  // service to signup
+  /**
+   * Registers a new user
+   * @param {string} name - Name 
+   * @param {string} email - Email 
+   * @param {string} password - Password
+   * @returns {Promise<void>} - Sign up response
+   */
   async signup(name: string, email: string, password: string): Promise<void> {
     const reqData = {
       name: name,
@@ -48,7 +59,11 @@ const authService = {
     }
   },
 
-  // service to refresh token
+  /**
+   * Obtains a new access token using a refresh token
+   * @param {string} refreshToken - Refresh token
+   * @returns {Promise<{token: string, newRefreshToken: string}>} - Returns the new token and refresh token
+   */
   async refreshToken(
     refreshToken: string
   ): Promise<{ token: string; newRefreshToken: string }> {
