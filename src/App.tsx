@@ -117,7 +117,7 @@ function App() {
           }
         />
         <Route
-          path="/user/taking-assessment"
+          path="/user/assessments/take/:attemptId"
           element={
             <ProtectedRoute>
               {authState.user?.role === "user" ? (
