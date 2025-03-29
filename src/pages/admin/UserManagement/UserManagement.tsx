@@ -36,6 +36,7 @@ const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<UserType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
@@ -393,10 +394,12 @@ const UserManagement: React.FC = () => {
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
-        showDeleteConfirm={showDeleteConfirm}
-        setShowDeleteConfirm={setShowDeleteConfirm}
-        userToDelete={userToDelete}
-        handleDeleteUser={handleDeleteUser}
+        show={showDeleteConfirm}
+        onHide={() => setShowDeleteConfirm(false)}
+        title="Delete User"
+        message={`Are you sure you want to delete ${userToDelete?.name}?`}
+        confirmButtonText="Delete User"
+        onConfirm={handleDeleteUser}
       />
     </Container>
   );

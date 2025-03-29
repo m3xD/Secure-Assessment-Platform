@@ -15,6 +15,9 @@ import UserDashboard from "./pages/user/UserDashboard/UserDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard/AdminDashboard";
 import ProfilePage from "./pages/profile/ProfilePage";
 import UserManagement from "./pages/admin/UserManagement/UserManagement";
+import AssessmentManagement from "./pages/admin/AssessmentManagement/AssessmentManagement";
+import TakingAssessment from "./pages/user/TakingAssessment/TakingAssessment";
+import AssessmentDetail from "./pages/admin/AssessmentDetail/AssessmentDetail";
 
 // Create a protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -113,6 +116,18 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/user/taking-assessment"
+          element={
+            <ProtectedRoute>
+              {authState.user?.role === "user" ? (
+                <TakingAssessment />
+              ) : (
+                <Navigate to="/" />
+              )}
+            </ProtectedRoute>
+          }
+        />
 
         {/* Admin routes - protected */}
         <Route
@@ -133,6 +148,30 @@ function App() {
             <ProtectedRoute>
               {authState.user?.role === "admin" ? (
                 <UserManagement />
+              ) : (
+                <Navigate to="/" />
+              )}
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/assessments"
+          element={
+            <ProtectedRoute>
+              {authState.user?.role === "admin" ? (
+                <AssessmentManagement />
+              ) : (
+                <Navigate to="/" />
+              )}
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/assessments/:id"
+          element={
+            <ProtectedRoute>
+              {authState.user?.role === "admin" ? (
+                <AssessmentDetail />
               ) : (
                 <Navigate to="/" />
               )}
