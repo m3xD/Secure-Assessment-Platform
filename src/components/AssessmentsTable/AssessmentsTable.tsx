@@ -1,16 +1,9 @@
 import React from "react";
 import { Badge, Button, Table } from "react-bootstrap";
 import { ArrowDown, ArrowUp, Copy, Edit, Eye, Trash2 } from "react-feather";
+import { useNavigate } from "react-router-dom";
+import { useAssessmentContext } from "../../contexts/AssessmentContext";
 
-interface AssessmentsTableProps {
-  assessments: any;
-  sort: string;
-  handleSortChange: (field: string) => void;
-  handleViewAssessment: (id: string) => void;
-  handleEditClick: (assessment: any) => void;
-  handleDuplicateClick: (assessment: any) => void;
-  handleDeleteClick: (id: string) => void;
-}
 // Render status badge
 const renderStatusBadge = (status: string) => {
   switch (status.toLowerCase()) {
@@ -25,23 +18,68 @@ const renderStatusBadge = (status: string) => {
   }
 };
 
-const AssessmentsTable: React.FC<AssessmentsTableProps> = ({
-  assessments,
-  sort,
-  handleSortChange,
-  handleViewAssessment,
-  handleEditClick,
-  handleDuplicateClick,
-  handleDeleteClick,
-}) => {
+const AssessmentsTable: React.FC = () => {
+  const navigate = useNavigate();
+  const { state, dispatch } = useAssessmentContext();
+  const { assessmentList, filters } = state;
+  const assessments = assessmentList.content;
+
+  // Handler functions that were previously passed as props
+  const handleSortChange = (field: string) => {
+    const currentDirection = filters.sort.split(",")[1];
+    const newDirection = currentDirection === "asc" ? "desc" : "asc";
+    dispatch({ 
+      type: "SET_FILTER", 
+      payload: { name: 'sort', value: `${field},${newDirection}` } 
+    });
+  };
+
+  const handleViewAssessment = (id: string) => {
+    navigate(`/admin/assessments/${id}`);
+  };
+
+  const handleEditClick = (assessment: any) => {
+    dispatch({ 
+      type: "OPEN_EDIT_MODAL", 
+      payload: {
+        title: assessment.title,
+        subject: assessment.subject,
+        description: assessment.description || "",
+        duration: assessment.duration,
+        dueDate: assessment.dueDate || "",
+        status: assessment.status.toLowerCase(),
+        passingScore: assessment.passingScore,
+        id: assessment.id,
+        createdBy: assessment.createdBy,
+        createdDate: assessment.createdDate,
+        attempts: assessment.attempts,
+        questionCount: assessment.questionCount
+      }
+    });
+  };
+
+  const handleDuplicateClick = (assessment: any) => {
+    dispatch({ 
+      type: "OPEN_DUPLICATE_MODAL", 
+      payload: assessment 
+    });
+  };
+
+  const handleDeleteClick = (id: string) => {
+    dispatch({ 
+      type: "OPEN_DELETE_MODAL", 
+      payload: id 
+    });
+  };
+
   return (
     <Table responsive className="assessment-table mb-0">
       <thead>
         <tr>
           <th className="clickable" onClick={() => handleSortChange("title")}>
             Title
-            {sort.startsWith("title") &&
-              (sort.endsWith("asc") ? (
+            {filters.sort.startsWith("title") &&
+              (filters.sort.endsWith("asc") ? (
                 <ArrowUp size={14} className="ms-1" />
               ) : (
                 <ArrowDown size={14} className="ms-1" />
@@ -50,8 +88,8 @@ const AssessmentsTable: React.FC<AssessmentsTableProps> = ({
           <th>Subject</th>
           <th className="clickable" onClick={() => handleSortChange("status")}>
             Status
-            {sort.startsWith("status") &&
-              (sort.endsWith("asc") ? (
+            {filters.sort.startsWith("status") &&
+              (filters.sort.endsWith("asc") ? (
                 <ArrowUp size={14} className="ms-1" />
               ) : (
                 <ArrowDown size={14} className="ms-1" />
@@ -63,8 +101,8 @@ const AssessmentsTable: React.FC<AssessmentsTableProps> = ({
             onClick={() => handleSortChange("duration")}
           >
             Duration
-            {sort.startsWith("duration") &&
-              (sort.endsWith("asc") ? (
+            {filters.sort.startsWith("duration") &&
+              (filters.sort.endsWith("asc") ? (
                 <ArrowUp size={14} className="ms-1" />
               ) : (
                 <ArrowDown size={14} className="ms-1" />
@@ -75,8 +113,8 @@ const AssessmentsTable: React.FC<AssessmentsTableProps> = ({
             onClick={() => handleSortChange("createdDate")}
           >
             Created
-            {sort.startsWith("createdDate") &&
-              (sort.endsWith("asc") ? (
+            {filters.sort.startsWith("createdDate") &&
+              (filters.sort.endsWith("asc") ? (
                 <ArrowUp size={14} className="ms-1" />
               ) : (
                 <ArrowDown size={14} className="ms-1" />
@@ -86,7 +124,7 @@ const AssessmentsTable: React.FC<AssessmentsTableProps> = ({
         </tr>
       </thead>
       <tbody>
-        {assessments.content.map((assessment: any) => (
+        {assessments.map((assessment: any) => (
           <tr key={assessment.id}>
             <td>
               <div className="assessment-title">{assessment.title}</div>

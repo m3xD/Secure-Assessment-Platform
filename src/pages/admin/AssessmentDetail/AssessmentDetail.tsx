@@ -1,36 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Nav, Form, Button, Alert, Table, Badge, Accordion, Modal, Tabs, Tab } from 'react-bootstrap';
 import { ArrowLeft, Plus, Edit, Trash2, Eye, Settings, CheckSquare, FileText, HelpCircle, BarChart2 } from 'react-feather';
-import { toast } from 'react-toastify';
-import assessmentsService from '../../../services/assessmentsService';
-import questionsService from '../../../services/questionsService';
-import { AssessmentDetails, AssessmentSettings } from '../../../types/AssessmentTypes';
-import { Question, QuestionData } from '../../../types/QuestionTypes';
+import { QuestionData } from '../../../types/QuestionTypes';
 import DeleteConfirmationModal from '../../../components/DeleteConfirmationModal/DeleteConfirmationModal';
+import { useAssessmentDetail } from '../../../hooks/useAssessmentDetail';
+import { useAssessmentQuestions } from '../../../hooks/useAssessmentQuestions';
 import './AssessmentDetail.scss';
 
 const AssessmentDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   
-  // State for assessment details
-  const [assessment, setAssessment] = useState<AssessmentDetails | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  // Use our custom hooks
+  const {
+    assessment,
+    questions,
+    settings,
+    loading,
+    error,
+    isEditingSettings,
+    setIsEditingSettings,
+    updateSettings,
+    publishAssessment
+  } = useAssessmentDetail(id);
   
-  // State for questions
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const {
+    addQuestion,
+    updateQuestion,
+    deleteQuestion
+  } = useAssessmentQuestions(id);
   
-  // State for active tab
+  // Local state
   const [activeTab, setActiveTab] = useState<string>('questions');
-  
-  // State for modals
   const [showDeleteQuestionModal, setShowDeleteQuestionModal] = useState<boolean>(false);
   const [questionToDelete, setQuestionToDelete] = useState<string | null>(null);
   const [showAddQuestionModal, setShowAddQuestionModal] = useState<boolean>(false);
   const [newQuestion, setNewQuestion] = useState<QuestionData>({
-    type: 'multiChoice',
+    type: 'multi-choice',
     text: '',
     options: [
       { id: 'o1', text: '' },
@@ -39,77 +46,7 @@ const AssessmentDetail = () => {
     correctAnswer: '',
     points: 1
   });
-  
-  // State for settings
-  const [settingsForm, setSettingsForm] = useState<AssessmentSettings | null>(null);
-  const [isEditingSettings, setIsEditingSettings] = useState<boolean>(false);
-  
-  // Load assessment details
-  useEffect(() => {
-    if (!id) return;
-    
-    const fetchAssessmentDetails = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const assessmentDetails = await assessmentsService.getAssessmentById(id);
-        setAssessment(assessmentDetails);
-        setQuestions(assessmentDetails.questions);
-        setSettingsForm(assessmentDetails.settings);
-        
-      } catch (err) {
-        console.error('Error loading assessment details:', err);
-        setError('Failed to load assessment details. Please try again.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchAssessmentDetails();
-  }, [id]);
-  
-  // Handle delete question click
-  const handleDeleteQuestionClick = (questionId: string) => {
-    setQuestionToDelete(questionId);
-    setShowDeleteQuestionModal(true);
-  };
-  
-  // Delete question
-  const handleDeleteQuestionConfirm = async () => {
-    if (!questionToDelete || !id) return;
-    
-    try {
-      await questionsService.deleteQuestion(id, questionToDelete);
-      
-      // Update questions state
-      setQuestions(prev => prev.filter(q => q.id !== questionToDelete));
-      
-      toast.success('Question deleted successfully');
-    } catch (err) {
-      console.error('Error deleting question:', err);
-      toast.error('Failed to delete question. Please try again.');
-    } finally {
-      setShowDeleteQuestionModal(false);
-      setQuestionToDelete(null);
-    }
-  };
-  
-  // Handle add question click
-  const handleAddQuestionClick = () => {
-    setNewQuestion({
-      type: 'multiChoice',
-      text: '',
-      options: [
-        { id: 'o1', text: '' },
-        { id: 'o2', text: '' }
-      ],
-      correctAnswer: '',
-      points: 1
-    });
-    setShowAddQuestionModal(true);
-  };
-  
+
   // Add option to new question
   const handleAddOption = () => {
     if (newQuestion.options.length >= 6) return;
@@ -138,14 +75,14 @@ const AssessmentDetail = () => {
   const handleQuestionTypeChange = (type: string) => {
     let options = newQuestion.options;
     
-    if (type === 'trueFalse') {
+    if (type === 'true-false') {
       options = [
         { id: 'true', text: 'True' },
         { id: 'false', text: 'False' }
       ];
     } else if (type === 'essay') {
       options = [];
-    } else if (newQuestion.type === 'trueFalse' || newQuestion.type === 'essay') {
+    } else if (newQuestion.type === 'true-false' || newQuestion.type === 'essay') {
       options = [
         { id: 'o1', text: '' },
         { id: 'o2', text: '' }
@@ -162,38 +99,20 @@ const AssessmentDetail = () => {
   
   // Add new question
   const handleAddQuestionSubmit = async () => {
-    if (!id) return;
-    
-    try {
-      // Validate question
-      if (!newQuestion.text.trim()) {
-        toast.error('Question text is required');
-        return;
-      }
-      
-      if (newQuestion.type !== 'essay') {
-        if (newQuestion.options.some(o => !o.text.trim())) {
-          toast.error('All options must have text');
-          return;
-        }
-        
-        if (!newQuestion.correctAnswer && newQuestion.type !== 'essay') {
-          toast.error('You must select a correct answer');
-          return;
-        }
-      }
-      
-      // Add question
-      const addedQuestion = await questionsService.addQuestion(id, newQuestion);
-      
-      // Update questions state
-      setQuestions(prev => [...prev, addedQuestion]);
-      
-      toast.success('Question added successfully');
+    const success = await addQuestion(newQuestion);
+    if (success) {
       setShowAddQuestionModal(false);
-    } catch (err) {
-      console.error('Error adding question:', err);
-      toast.error('Failed to add question. Please try again.');
+      // Reset form
+      setNewQuestion({
+        type: 'multi-choice',
+        text: '',
+        options: [
+          { id: 'o1', text: '' },
+          { id: 'o2', text: '' }
+        ],
+        correctAnswer: '',
+        points: 1
+      });
     }
   };
   
@@ -201,66 +120,55 @@ const AssessmentDetail = () => {
   const handleSettingsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     
-    setSettingsForm(prev => {
-      if (!prev) return prev;
-      
-      return {
-        ...prev,
+    if (settings) {
+      const newSettings = {
+        ...settings,
         [name]: type === 'checkbox' ? checked : value
       };
-    });
+      setSettingsForm(newSettings);
+    }
   };
   
-  // Save settings
+  // Local state for settings form
+  const [settingsForm, setSettingsForm] = useState(settings);
+  
+  // Handle save settings
   const handleSaveSettings = async () => {
-    if (!id || !settingsForm) return;
-    
-    try {
-      await assessmentsService.updateAssessmentSettings(id, settingsForm);
-      
-      // Update assessment state
-      setAssessment(prev => {
-        if (!prev) return prev;
-        
-        return {
-          ...prev,
-          settings: settingsForm
-        };
-      });
-      
-      setIsEditingSettings(false);
-      toast.success('Settings updated successfully');
-    } catch (err) {
-      console.error('Error updating settings:', err);
-      toast.error('Failed to update settings. Please try again.');
+    if (settingsForm) {
+      await updateSettings(settingsForm);
     }
   };
   
-  // Publish assessment
-  const handlePublishAssessment = async () => {
-    if (!id) return;
+  // Handle delete question
+  const handleDeleteQuestionClick = (questionId: string) => {
+    setQuestionToDelete(questionId);
+    setShowDeleteQuestionModal(true);
+  };
+  
+  // Delete question confirmation
+  const handleDeleteQuestionConfirm = async () => {
+    if (!questionToDelete) return;
     
-    try {
-      await assessmentsService.publishAssessment(id);
-      
-      // Update assessment state
-      setAssessment(prev => {
-        if (!prev) return prev;
-        
-        return {
-          ...prev,
-          assessment: {
-            ...prev,
-            status: 'active'
-          }
-        };
-      });
-      
-      toast.success('Assessment published successfully');
-    } catch (err) {
-      console.error('Error publishing assessment:', err);
-      toast.error('Failed to publish assessment. Please try again.');
+    const success = await deleteQuestion(questionToDelete);
+    if (success) {
+      setShowDeleteQuestionModal(false);
+      setQuestionToDelete(null);
     }
+  };
+  
+  // Handle add question click
+  const handleAddQuestionClick = () => {
+    setNewQuestion({
+      type: 'multi-choice',
+      text: '',
+      options: [
+        { id: 'o1', text: '' },
+        { id: 'o2', text: '' }
+      ],
+      correctAnswer: '',
+      points: 1
+    });
+    setShowAddQuestionModal(true);
   };
   
   // Format date
@@ -274,7 +182,7 @@ const AssessmentDetail = () => {
       minute: '2-digit'
     });
   };
-  
+
   if (loading) {
     return (
       <div className="assessment-detail">
@@ -354,7 +262,7 @@ const AssessmentDetail = () => {
             {assessment.status !== 'active' && (
               <Button 
                 variant="success" 
-                onClick={handlePublishAssessment}
+                onClick={publishAssessment}
                 disabled={questions.length === 0}
               >
                 <CheckSquare size={16} className="me-2" />
@@ -715,7 +623,7 @@ const AssessmentDetail = () => {
                                 <div className="question-number">Question {index + 1}</div>
                                 <div className="question-text mb-3">{question.text}</div>
                                 
-                                {question.type === 'multiChoice' && (
+                                {question.type === 'multi-choice' && (
                                   <div className="options-list">
                                     {question.options.map(option => (
                                       <div key={option.id} className="option-item">
@@ -731,7 +639,7 @@ const AssessmentDetail = () => {
                                   </div>
                                 )}
                                 
-                                {question.type === 'trueFalse' && (
+                                {question.type === 'true-false' && (
                                   <div className="options-list">
                                     <div className="option-item">
                                       <Form.Check
@@ -928,8 +836,8 @@ const AssessmentDetail = () => {
                 value={newQuestion.type}
                 onChange={(e) => handleQuestionTypeChange(e.target.value)}
               >
-                <option value="multiChoice">Multiple Choice</option>
-                <option value="trueFalse">True/False</option>
+                <option value="multi-choice">Multiple Choice</option>
+                <option value="true-false">True/False</option>
                 <option value="essay">Essay</option>
               </Form.Select>
             </Form.Group>
@@ -960,7 +868,7 @@ const AssessmentDetail = () => {
                 <Form.Group className="mb-3">
                   <div className="d-flex justify-content-between align-items-center">
                     <Form.Label>Options</Form.Label>
-                    {newQuestion.type === 'multiChoice' && (
+                    {newQuestion.type === 'multi-choice' && (
                       <Button 
                         variant="outline-primary" 
                         size="sm"
@@ -991,9 +899,9 @@ const AssessmentDetail = () => {
                           setNewQuestion(prev => ({ ...prev, options: updatedOptions }));
                         }}
                         placeholder={`Option ${index + 1}`}
-                        disabled={newQuestion.type === 'trueFalse'}
+                        disabled={newQuestion.type === 'true-false'}
                       />
-                      {newQuestion.type === 'multiChoice' && newQuestion.options.length > 2 && (
+                      {newQuestion.type === 'multi-choice' && newQuestion.options.length > 2 && (
                         <Button 
                           variant="outline-danger" 
                           size="sm"

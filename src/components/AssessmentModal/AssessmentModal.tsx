@@ -1,22 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
 import { AssessmentData } from "../../types/AssessmentTypes";
+import { useAssessmentContext } from "../../contexts/AssessmentContext";
+import assessmentsService from "../../services/assessmentsService";
+import { toast } from "react-toastify";
 
-interface AssessmentModalProps {
-  show: boolean;
-  onHide: () => void;
-  modalMode: "create" | "edit";
-  assessment: AssessmentData | null;
-  onSubmit: (assessmentData: AssessmentData) => Promise<void>;
-}
+const AssessmentModal: React.FC = () => {
+  const { state, dispatch } = useAssessmentContext();
+  const { ui } = state;
+  const { showCreateEditModal, modalMode, selectedAssessment } = ui;
 
-const AssessmentModal: React.FC<AssessmentModalProps> = ({
-  show,
-  onHide,
-  modalMode,
-  assessment,
-  onSubmit,
-}) => {
   // Initialize form state
   const defaultFormState: AssessmentData = {
     title: "",
@@ -34,12 +27,12 @@ const AssessmentModal: React.FC<AssessmentModalProps> = ({
 
   // Update form data when assessment changes
   useEffect(() => {
-    if (modalMode === "edit" && assessment) {
-      setFormData(assessment);
+    if (modalMode === "edit" && selectedAssessment) {
+      setFormData(selectedAssessment);
     } else {
       setFormData(defaultFormState);
     }
-  }, [assessment, modalMode]);
+  }, [selectedAssessment, modalMode]);
 
   // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -83,6 +76,11 @@ const AssessmentModal: React.FC<AssessmentModalProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
+  // Close modal
+  const handleClose = () => {
+    dispatch({ type: "CLOSE_MODAL" });
+  };
+
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,17 +91,30 @@ const AssessmentModal: React.FC<AssessmentModalProps> = ({
     
     setIsSubmitting(true);
     try {
-      await onSubmit(formData);
-      onHide();
+      if (modalMode === "create") {
+        const newAssessment = await assessmentsService.createAssessment(formData);
+        dispatch({ type: "ADD_ASSESSMENT", payload: newAssessment });
+        toast.success("Assessment created successfully");
+      } else if (selectedAssessment) {
+        const updated = await assessmentsService.updateAssessment(
+          selectedAssessment.id,
+          formData
+        );
+        dispatch({ type: "UPDATE_ASSESSMENT", payload: updated });
+        toast.success("Assessment updated successfully");
+      }
+      
+      handleClose();
     } catch (error) {
       console.error("Error submitting assessment:", error);
+      toast.error("Failed to process assessment. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <Modal show={show} onHide={onHide} size="lg">
+    <Modal show={showCreateEditModal} onHide={handleClose} size="lg">
       <Modal.Header closeButton>
         <Modal.Title>
           {modalMode === "create" ? "Create New Assessment" : "Edit Assessment"}
@@ -239,7 +250,7 @@ const AssessmentModal: React.FC<AssessmentModalProps> = ({
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={onHide}>
+          <Button variant="secondary" onClick={handleClose}>
             Cancel
           </Button>
           <Button 

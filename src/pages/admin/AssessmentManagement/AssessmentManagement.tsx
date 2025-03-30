@@ -1,253 +1,72 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
-  Container,
-  Row,
-  Col,
-  Card,
-  Button,
-  Form,
-  InputGroup,
-  Pagination,
+  Container, Row, Col, Card, Button, Form, InputGroup, Pagination,
 } from "react-bootstrap";
 import { Search, Filter, Plus, Trash2 } from "react-feather";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import assessmentsService from "../../../services/assessmentsService";
-import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal/DeleteConfirmationModal";
-import "./AssessmentManagement.scss";
-import DuplicateAssessmentModal from "../../../components/DuplicateAssessmentModal/DuplicateAssessmentModal";
+import { useAssessmentContext } from "../../../contexts/AssessmentContext";
+import { useAssessmentList } from "../../../hooks/useAssessmentList";
 import AssessmentsTable from "../../../components/AssessmentsTable/AssessmentsTable";
 import AssessmentModal from "../../../components/AssessmentModal/AssessmentModal";
-import { AssessmentData } from "../../../types/AssessmentTypes";
+import DeleteConfirmationAssessmentModal from "../../../components/DeleteConfirmationModal/DeleteConfirmationAssessmentModal";
+import DuplicateAssessmentModal from "../../../components/DuplicateAssessmentModal/DuplicateAssessmentModal";
+import "./AssessmentManagement.scss";
 
 const AssessmentManagement: React.FC = () => {
+  const { state, dispatch } = useAssessmentContext();
+  const { filters, assessmentList } = state;
+  const { 
+    loading, 
+    error, 
+    totalElements, 
+    totalPages, 
+    setFilter, 
+    resetFilters,
+    fetchAssessments
+  } = useAssessmentList();
+  
   const navigate = useNavigate();
-
-  // State for assessments and pagination
-  const [assessments, setAssessments] = useState<any>({
-    content: [],
-    totalElements: 0,
-    totalPages: 0,
-  });
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Filters and search state
-  const [page, setPage] = useState<number>(0);
-  const [size, setSize] = useState<number>(10);
-  const [subject, setSubject] = useState<string>("");
-  const [status, setStatus] = useState<string>("");
-  const [search, setSearch] = useState<string>("");
-  const [sort, setSort] = useState<string>("");
-
-  // State for modals
-  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
-  const [assessmentToDelete, setAssessmentToDelete] = useState<string | null>(
-    null
-  );
-  const [showDuplicateModal, setShowDuplicateModal] = useState<boolean>(false);
-  const [assessmentToDuplicate, setAssessmentToDuplicate] = useState<any>(null);
-  const [newTitle, setNewTitle] = useState<string>("");
-  const [showModal, setShowModal] = useState<boolean>(false);
-  const [modalMode, setModalMode] = useState<"create" | "edit">("create");
-  const [selectedAssessment, setSelectedAssessment] =
-    useState<AssessmentData | null>(null);
-
-  // Load assessments
-  useEffect(() => {
-    fetchAssessments();
-  }, [page, size, subject, status, sort]);
-
-  // Fetch assessments with filters
-  const fetchAssessments = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await assessmentsService.getAllAssessments(
-        page,
-        size,
-        subject,
-        status,
-        search,
-        sort
-      );
-
-      setAssessments(response);
-    } catch (err) {
-      console.error("Error fetching assessments:", err);
-      setError("Failed to load assessments. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  
   // Handle search
   const handleSearch = () => {
-    setPage(0);
-    fetchAssessments();
+    setFilter('page', 0);
   };
-
-  // Handle filter reset
-  const handleResetFilters = () => {
-    setSubject("");
-    setStatus("");
-    setSearch("");
-    setSort("createdDate,desc");
-    setPage(0);
-  };
-
-  // Handle sort change
-  const handleSortChange = (field: string) => {
-    const currentDirection = sort.split(",")[1];
-    const newDirection = currentDirection === "asc" ? "desc" : "asc";
-    setSort(`${field},${newDirection}`);
-  };
-
-  // Navigate to assessment details
-  const handleViewAssessment = (id: string) => {
-    navigate(`/admin/assessments/${id}`);
-  };
-
-  // Open delete confirmation modal
-  const handleDeleteClick = (id: string) => {
-    setAssessmentToDelete(id);
-    setShowDeleteModal(true);
-  };
-
-  // Delete assessment
-  const handleDeleteConfirm = async () => {
-    if (!assessmentToDelete) return;
-
-    try {
-      await assessmentsService.deleteAssessment(assessmentToDelete);
-
-      toast.success("Assessment deleted successfully");
-      fetchAssessments();
-    } catch (err) {
-      console.error("Error deleting assessment:", err);
-      toast.error("Failed to delete assessment. Please try again.");
-    } finally {
-      setShowDeleteModal(false);
-      setAssessmentToDelete(null);
-    }
-  };
-
-  // Open duplicate modal
-  const handleDuplicateClick = (assessment: any) => {
-    setAssessmentToDuplicate(assessment);
-    setNewTitle(`${assessment.title} (Copy)`);
-    setShowDuplicateModal(true);
-  };
-
-  // Duplicate assessment
-  const handleDuplicateConfirm = async () => {
-    if (!assessmentToDuplicate || !newTitle.trim()) return;
-
-    try {
-      await assessmentsService.duplicateAssessment(
-        assessmentToDuplicate.id,
-        newTitle,
-        true, // copy questions
-        true, // copy settings
-        true // set as draft
-      );
-
-      toast.success("Assessment duplicated successfully");
-      fetchAssessments();
-    } catch (err) {
-      console.error("Error duplicating assessment:", err);
-      toast.error("Failed to duplicate assessment. Please try again.");
-    } finally {
-      setShowDuplicateModal(false);
-      setAssessmentToDuplicate(null);
-      setNewTitle("");
-    }
-  };
-
+  
+  // Handle create assessment click
   const handleCreateAssessmentClick = () => {
-    setSelectedAssessment(null);
-    setModalMode("create");
-    setShowModal(true);
+    dispatch({ type: 'OPEN_CREATE_MODAL' });
   };
-
-  const handleEditAssessmentClick = (assessment: any) => {
-    const assessmentData: AssessmentData = {
-      title: assessment.title,
-      subject: assessment.subject,
-      description: assessment.description || "",
-      duration: assessment.duration,
-      dueDate: assessment.dueDate || "",
-      status: assessment.status.toLowerCase(),
-      passingScore: assessment.passingScore,
-    };
-
-    setSelectedAssessment(assessmentData);
-    setModalMode("edit");
-    setShowModal(true);
-  };
-
-  const handleAssessmentSubmit = async (assessmentData: AssessmentData) => {
-    try {
-      if (modalMode === "create") {
-        await assessmentsService.createAssessment(assessmentData);
-        toast.success("Assessment created successfully");
-      } else if (modalMode === "edit" && selectedAssessment) {
-        const assessmentId = assessments.content.find(
-          (a: any) => a.title === selectedAssessment.title
-        )?.id;
-
-        if (assessmentId) {
-          await assessmentsService.updateAssessment(assessmentId, assessmentData);
-          toast.success("Assessment updated successfully");
-        } else {
-          throw new Error("Assessment ID not found");
-        }
-      }
-      fetchAssessments();
-    } catch (err) {
-      console.error("Error submitting assessment:", err);
-      toast.error("Failed to save assessment. Please try again.");
-      throw err;
-    }
-  };
-
-  // Create new assessment
-  const handleCreateAssessment = async () => {
-    navigate("/admin/assessments/new");
-  };
-
+  
+  
   // Render pagination
   const renderPagination = () => {
-    const totalPages = assessments.totalPages || 1;
-
     return (
       <Pagination className="mt-3 justify-content-center">
-        <Pagination.First onClick={() => setPage(0)} disabled={page === 0} />
+        <Pagination.First onClick={() => setFilter('page', 0)} disabled={filters.page === 0} />
         <Pagination.Prev
-          onClick={() => setPage(Math.max(0, page - 1))}
-          disabled={page === 0}
+          onClick={() => setFilter('page', Math.max(0, filters.page - 1))}
+          disabled={filters.page === 0}
         />
 
         {[...Array(totalPages)]
           .map((_, idx) => (
             <Pagination.Item
               key={idx}
-              active={idx === page}
-              onClick={() => setPage(idx)}
+              active={idx === filters.page}
+              onClick={() => setFilter('page', idx)}
             >
               {idx + 1}
             </Pagination.Item>
           ))
-          .slice(Math.max(0, page - 2), Math.min(totalPages, page + 3))}
+          .slice(Math.max(0, filters.page - 2), Math.min(totalPages, filters.page + 3))}
 
         <Pagination.Next
-          onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
-          disabled={page === totalPages - 1}
+          onClick={() => setFilter('page', Math.min(totalPages - 1, filters.page + 1))}
+          disabled={filters.page === totalPages - 1}
         />
         <Pagination.Last
-          onClick={() => setPage(totalPages - 1)}
-          disabled={page === totalPages - 1}
+          onClick={() => setFilter('page', totalPages - 1)}
+          disabled={filters.page === totalPages - 1}
         />
       </Pagination>
     );
@@ -278,8 +97,8 @@ const AssessmentManagement: React.FC = () => {
                 <InputGroup>
                   <Form.Control
                     placeholder="Search assessments..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                    value={filters.search}
+                    onChange={(e) => setFilter('search', e.target.value)}
                     onKeyPress={(e) => e.key === "Enter" && handleSearch()}
                   />
                   <Button variant="outline-secondary" onClick={handleSearch}>
@@ -290,8 +109,8 @@ const AssessmentManagement: React.FC = () => {
 
               <Col md={3}>
                 <Form.Select
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
+                  value={filters.subject}
+                  onChange={(e) => setFilter('subject', e.target.value)}
                 >
                   <option value="">All Subjects</option>
                   <option value="math">Mathematics</option>
@@ -303,8 +122,8 @@ const AssessmentManagement: React.FC = () => {
 
               <Col md={3}>
                 <Form.Select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
+                  value={filters.status}
+                  onChange={(e) => setFilter('status', e.target.value)}
                 >
                   <option value="">All Statuses</option>
                   <option value="Active">Active</option>
@@ -316,7 +135,7 @@ const AssessmentManagement: React.FC = () => {
               <Col md={2} className="d-flex justify-content-end">
                 <Button
                   variant="outline-secondary"
-                  onClick={handleResetFilters}
+                  onClick={resetFilters}
                 >
                   <Filter size={16} className="me-2" />
                   Reset
@@ -341,11 +160,11 @@ const AssessmentManagement: React.FC = () => {
                   <Trash2 size={48} />
                 </div>
                 <p>{error}</p>
-                <Button variant="primary" onClick={fetchAssessments}>
+                <Button variant="primary" onClick={() => fetchAssessments()}>
                   Try Again
                 </Button>
               </div>
-            ) : assessments.content.length === 0 ? (
+            ) : assessmentList.content.length === 0 ? (
               <div className="text-center py-5">
                 <div className="text-muted mb-3">
                   <Filter size={48} />
@@ -354,32 +173,24 @@ const AssessmentManagement: React.FC = () => {
                   No assessments found. Create your first assessment or try
                   different filters.
                 </p>
-                <Button variant="primary" onClick={handleCreateAssessment}>
+                <Button variant="primary" onClick={handleCreateAssessmentClick}>
                   Create Assessment
                 </Button>
               </div>
             ) : (
-              <AssessmentsTable
-                assessments={assessments}
-                sort={sort}
-                handleSortChange={handleSortChange}
-                handleViewAssessment={handleViewAssessment}
-                handleEditClick={handleEditAssessmentClick}
-                handleDuplicateClick={handleDuplicateClick}
-                handleDeleteClick={handleDeleteClick}
-              />
+              <AssessmentsTable />
             )}
           </Card.Body>
         </Card>
 
-        {!loading && !error && assessments.content.length > 0 && (
+        {!loading && !error && assessmentList.content.length > 0 && (
           <div className="d-flex justify-content-between align-items-center mt-3">
             <div>
               <Form.Select
-                value={size}
+                value={filters.size}
                 onChange={(e) => {
-                  setSize(Number(e.target.value));
-                  setPage(0);
+                  setFilter('size', Number(e.target.value));
+                  setFilter('page', 0);
                 }}
                 style={{ width: "100px" }}
               >
@@ -393,39 +204,16 @@ const AssessmentManagement: React.FC = () => {
             {renderPagination()}
 
             <div className="text-muted">
-              Total: {assessments.totalElements} assessments
+              Total: {totalElements} assessments
             </div>
           </div>
         )}
       </Container>
 
-      {/* Delete Confirmation Modal */}
-      <DeleteConfirmationModal
-        show={showDeleteModal}
-        onHide={() => setShowDeleteModal(false)}
-        title="Delete Assessment"
-        message={`Are you sure you want to delete this assessment ${assessmentToDelete}? This action cannot be undone.`}
-        confirmButtonText="Delete Assessment"
-        onConfirm={handleDeleteConfirm}
-      />
-
-      {/* Duplicate Assessment Modal */}
-      <DuplicateAssessmentModal
-        show={showDuplicateModal}
-        newTitle={newTitle}
-        setNewTitle={setNewTitle}
-        onHide={() => setShowDuplicateModal(false)}
-        onConfirm={handleDuplicateConfirm}
-      />
-
-      {/* Assessment Modal */}
-      <AssessmentModal
-        show={showModal}
-        onHide={() => setShowModal(false)}
-        modalMode={modalMode}
-        assessment={selectedAssessment}
-        onSubmit={handleAssessmentSubmit}
-      />
+      {/* Modals - now context-aware */}
+      <AssessmentModal />
+      <DeleteConfirmationAssessmentModal />
+      <DuplicateAssessmentModal />
     </div>
   );
 };
