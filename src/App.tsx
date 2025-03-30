@@ -19,6 +19,7 @@ import AssessmentManagement from "./pages/admin/AssessmentManagement/AssessmentM
 import TakingAssessment from "./pages/user/TakingAssessment/TakingAssessment";
 import AssessmentDetail from "./pages/admin/AssessmentDetail/AssessmentDetail";
 import AssessmentLayout from "./layout/AssessmentLayout";
+import UserLayout from "./layout/UserLayout";
 
 // Create a protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -148,7 +149,9 @@ function App() {
           element={
             <ProtectedRoute>
               {authState.user?.role === "admin" ? (
-                <UserManagement />
+                <UserLayout>
+                  <UserManagement />
+                </UserLayout>
               ) : (
                 <Navigate to="/" />
               )}
