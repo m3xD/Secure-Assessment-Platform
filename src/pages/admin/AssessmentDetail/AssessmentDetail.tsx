@@ -37,11 +37,11 @@ const AssessmentDetail = () => {
   const [questionToDelete, setQuestionToDelete] = useState<string | null>(null);
   const [showAddQuestionModal, setShowAddQuestionModal] = useState<boolean>(false);
   const [newQuestion, setNewQuestion] = useState<QuestionData>({
-    type: 'multi-choice',
+    type: 'multiple-choice',
     text: '',
     options: [
-      { id: 'o1', text: '' },
-      { id: 'o2', text: '' }
+      { optionId: 'o1', text: '' },
+      { optionId: 'o2', text: '' }
     ],
     correctAnswer: '',
     points: 1
@@ -55,7 +55,7 @@ const AssessmentDetail = () => {
       ...prev,
       options: [
         ...prev.options,
-        { id: `o${prev.options.length + 1}`, text: '' }
+        { optionId: `o${prev.options.length + 1}`, text: '' }
       ]
     }));
   };
@@ -66,7 +66,7 @@ const AssessmentDetail = () => {
     
     setNewQuestion(prev => ({
       ...prev,
-      options: prev.options.filter(o => o.id !== optionId),
+      options: prev.options.filter(o => o.optionId !== optionId),
       correctAnswer: prev.correctAnswer === optionId ? '' : prev.correctAnswer
     }));
   };
@@ -77,15 +77,15 @@ const AssessmentDetail = () => {
     
     if (type === 'true-false') {
       options = [
-        { id: 'true', text: 'True' },
-        { id: 'false', text: 'False' }
+        { optionId: 'true', text: 'True' },
+        { optionId: 'false', text: 'False' }
       ];
     } else if (type === 'essay') {
       options = [];
     } else if (newQuestion.type === 'true-false' || newQuestion.type === 'essay') {
       options = [
-        { id: 'o1', text: '' },
-        { id: 'o2', text: '' }
+        { optionId: 'o1', text: '' },
+        { optionId: 'o2', text: '' }
       ];
     }
     
@@ -104,11 +104,11 @@ const AssessmentDetail = () => {
       setShowAddQuestionModal(false);
       // Reset form
       setNewQuestion({
-        type: 'multi-choice',
+        type: 'multiple-choice',
         text: '',
         options: [
-          { id: 'o1', text: '' },
-          { id: 'o2', text: '' }
+          { optionId: 'o1', text: '' },
+          { optionId: 'o2', text: '' }
         ],
         correctAnswer: '',
         points: 1
@@ -159,11 +159,11 @@ const AssessmentDetail = () => {
   // Handle add question click
   const handleAddQuestionClick = () => {
     setNewQuestion({
-      type: 'multi-choice',
+      type: 'multiple-choice',
       text: '',
       options: [
-        { id: 'o1', text: '' },
-        { id: 'o2', text: '' }
+        { optionId: 'o1', text: '' },
+        { optionId: 'o2', text: '' }
       ],
       correctAnswer: '',
       points: 1
@@ -405,11 +405,11 @@ const AssessmentDetail = () => {
                                     </thead>
                                     <tbody>
                                       {question.options.map(option => (
-                                        <tr key={option.id}>
-                                          <td>{option.id}</td>
+                                        <tr key={option.optionId}>
+                                          <td>{option.optionId}</td>
                                           <td>{option.text}</td>
                                           <td className="text-center">
-                                            {option.id === question.correctAnswer && (
+                                            {option.optionId === question.correctAnswer && (
                                               <CheckSquare size={18} className="text-success" />
                                             )}
                                           </td>
@@ -623,13 +623,13 @@ const AssessmentDetail = () => {
                                 <div className="question-number">Question {index + 1}</div>
                                 <div className="question-text mb-3">{question.text}</div>
                                 
-                                {question.type === 'multi-choice' && (
+                                {question.type === 'multiple-choice' && (
                                   <div className="options-list">
                                     {question.options.map(option => (
-                                      <div key={option.id} className="option-item">
+                                      <div key={option.optionId} className="option-item">
                                         <Form.Check
                                           type="radio"
-                                          id={`preview-${question.id}-${option.id}`}
+                                          id={`preview-${question.id}-${option.optionId}`}
                                           name={`preview-${question.id}`}
                                           label={option.text}
                                           disabled
@@ -836,7 +836,7 @@ const AssessmentDetail = () => {
                 value={newQuestion.type}
                 onChange={(e) => handleQuestionTypeChange(e.target.value)}
               >
-                <option value="multi-choice">Multiple Choice</option>
+                <option value="multiple-choice">Multiple Choice</option>
                 <option value="true-false">True/False</option>
                 <option value="essay">Essay</option>
               </Form.Select>
@@ -868,7 +868,7 @@ const AssessmentDetail = () => {
                 <Form.Group className="mb-3">
                   <div className="d-flex justify-content-between align-items-center">
                     <Form.Label>Options</Form.Label>
-                    {newQuestion.type === 'multi-choice' && (
+                    {newQuestion.type === 'multiple-choice' && (
                       <Button 
                         variant="outline-primary" 
                         size="sm"
@@ -882,14 +882,14 @@ const AssessmentDetail = () => {
                   </div>
                   
                   {newQuestion.options.map((option, index) => (
-                    <div key={option.id} className="d-flex mb-2 align-items-center">
+                    <div key={option.optionId} className="d-flex mb-2 align-items-center">
                       <Form.Check
                         type="radio"
-                        id={`option-${option.id}`}
+                        id={`option-${option.optionId}`}
                         name="correctAnswer"
                         className="me-2"
-                        checked={newQuestion.correctAnswer === option.id}
-                        onChange={() => setNewQuestion(prev => ({ ...prev, correctAnswer: option.id }))}
+                        checked={newQuestion.correctAnswer === option.optionId}
+                        onChange={() => setNewQuestion(prev => ({ ...prev, correctAnswer: option.optionId }))}
                       />
                       <Form.Control
                         value={option.text}
@@ -901,12 +901,12 @@ const AssessmentDetail = () => {
                         placeholder={`Option ${index + 1}`}
                         disabled={newQuestion.type === 'true-false'}
                       />
-                      {newQuestion.type === 'multi-choice' && newQuestion.options.length > 2 && (
+                      {newQuestion.type === 'multiple-choice' && newQuestion.options.length > 2 && (
                         <Button 
                           variant="outline-danger" 
                           size="sm"
                           className="ms-2"
-                          onClick={() => handleRemoveOption(option.id)}
+                          onClick={() => handleRemoveOption(option.optionId)}
                         >
                           <Trash2 size={14} />
                         </Button>
