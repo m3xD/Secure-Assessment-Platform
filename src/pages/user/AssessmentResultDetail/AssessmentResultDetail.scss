@@ -1,0 +1,209 @@
+.assessment-result-detail {
+  background-color: var(--color-background);
+  margin-top: var(--header-height);
+  min-height: calc(100vh - var(--header-height));
+  padding: var(--padding-1);
+  
+  h1 {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  
+  .attempt-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    
+    .nav-item {
+      margin-bottom: 8px;
+      
+      .nav-link {
+        padding: 12px 16px;
+        border-radius: var(--border-radius);
+        text-align: center;
+        
+        &.active {
+          background-color: var(--color-primary);
+        }
+        
+        .small {
+          font-size: 0.75rem;
+          opacity: 0.8;
+        }
+      }
+    }
+  }
+  
+  .summary-stats {
+    .summary-stat-item {
+      padding: 1rem;
+      
+      .summary-stat-value {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: var(--color-primary);
+      }
+      
+      .summary-stat-label {
+        font-size: 0.9rem;
+        color: var(--color-gray);
+      }
+    }
+  }
+  
+  .score-legend {
+    font-size: 0.85rem;
+    
+    .legend-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      margin-right: 5px;
+    }
+  }
+  
+  .feedback-content {
+    background-color: rgba(var(--color-primary-rgb), 0.05);
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    border-left: 3px solid var(--color-primary);
+    
+    p {
+      margin-bottom: 0;
+    }
+  }
+  
+  .question-item {
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    
+    &:last-child {
+      padding-bottom: 0;
+      margin-bottom: 0;
+      border-bottom: none;
+    }
+    
+    .question-header {
+      margin-bottom: 0.5rem;
+    }
+    
+    .question-number {
+      font-weight: 600;
+      color: var(--color-primary);
+    }
+    
+    .question-status {
+      font-size: 0.9rem;
+      font-weight: 500;
+      
+      &.correct {
+        color: var(--success);
+      }
+      
+      &.incorrect {
+        color: var(--danger);
+      }
+    }
+    
+    .question-text {
+      font-size: 1.05rem;
+      margin-bottom: 1rem;
+    }
+    
+    .answers-section {
+      padding-left: 1rem;
+      
+      .answer-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--color-gray);
+        margin-bottom: 0.25rem;
+      }
+      
+      .correct-answer-label {
+        margin-top: 0.75rem;
+        color: var(--success);
+      }
+      
+      .feedback-label {
+        margin-top: 0.75rem;
+        color: var(--color-primary);
+      }
+      
+      .user-answer, 
+      .correct-answer, 
+      .essay-answer, 
+      .answer-feedback {
+        margin-bottom: 0.75rem;
+        font-size: 0.95rem;
+      }
+      
+      .essay-answer {
+        padding: 0.75rem;
+        background-color: rgba(0, 0, 0, 0.02);
+        border-radius: var(--border-radius);
+      }
+    }
+  }
+  
+  .status-container {
+    padding: 1rem 0;
+    
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 1.25rem;
+      font-weight: 600;
+      padding: 0.75rem 2rem;
+      border-radius: 50px;
+      
+      &.passed {
+        background-color: rgba(var(--success-rgb), 0.1);
+        color: var(--success);
+        
+        svg {
+          margin-right: 0.5rem;
+        }
+      }
+      
+      &.failed {
+        background-color: rgba(var(--danger-rgb), 0.1);
+        color: var(--danger);
+        
+        svg {
+          margin-right: 0.5rem;
+        }
+      }
+    }
+  }
+  
+  .details-list {
+    .detail-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      
+      &:first-child {
+        padding-top: 0;
+      }
+      
+      &:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+      
+      .detail-label {
+        color: var(--color-gray);
+        font-size: 0.9rem;
+      }
+      
+      .detail-value {
+        font-weight: 500;
+        text-align: right;
+      }
+    }
+  }
+}

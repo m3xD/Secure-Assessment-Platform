@@ -18,21 +18,32 @@ const TrueFalseQuestion: React.FC<TrueFalseQuestionProps> = ({
       <div className="question-text">{question.text}</div>
       
       <div className="options-list">
-        {question.options.map(option => (
-          <div 
-            key={option.id}
-            className={`option-item ${selectedAnswer === option.id ? 'selected' : ''}`}
-            onClick={() => onChange(option.id)}
-          >
-            <Form.Check
-              type="radio"
-              id={`option-${option.id}`}
-              label={option.text}
-              checked={selectedAnswer === option.id}
-              onChange={() => onChange(option.id)}
-            />
-          </div>
-        ))}
+        {/* Instead of mapping over options, render fixed True/False options */}
+        <div 
+          className={`option-item ${selectedAnswer === 'true' ? 'selected' : ''}`}
+          onClick={() => onChange('true')}
+        >
+          <Form.Check
+            type="radio"
+            id={`option-true-${question.id}`}
+            label="True"
+            checked={selectedAnswer === 'true'}
+            onChange={() => onChange('true')}
+          />
+        </div>
+        
+        <div 
+          className={`option-item ${selectedAnswer === 'false' ? 'selected' : ''}`}
+          onClick={() => onChange('false')}
+        >
+          <Form.Check
+            type="radio"
+            id={`option-false-${question.id}`}
+            label="False"
+            checked={selectedAnswer === 'false'}
+            onChange={() => onChange('false')}
+          />
+        </div>
       </div>
     </div>
   );

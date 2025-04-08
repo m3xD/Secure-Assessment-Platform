@@ -20,6 +20,9 @@ import TakingAssessment from "./pages/user/TakingAssessment/TakingAssessment";
 import AssessmentDetail from "./pages/admin/AssessmentDetail/AssessmentDetail";
 import AssessmentLayout from "./layout/AssessmentLayout";
 import UserLayout from "./layout/UserLayout";
+import AssessmentTakingLayout from "./layout/AssessmentTakingLayout";
+import RecentAssessmentsList from "./pages/user/RecentAssessmentsList/RecentAssessmentsList";
+import AssessmentResultDetail from "./pages/user/AssessmentResultDetail/AssessmentResultDetail";
 
 // Create a protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -111,7 +114,9 @@ function App() {
           element={
             <ProtectedRoute>
               {authState.user?.role === "user" ? (
-                <UserDashboard />
+                <AssessmentTakingLayout>
+                  <UserDashboard />
+                </AssessmentTakingLayout>
               ) : (
                 <Navigate to="/" />
               )}
@@ -123,7 +128,36 @@ function App() {
           element={
             <ProtectedRoute>
               {authState.user?.role === "user" ? (
-                <TakingAssessment />
+                <AssessmentTakingLayout>
+                  <TakingAssessment />
+                </AssessmentTakingLayout>
+              ) : (
+                <Navigate to="/" />
+              )}
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/user/assessments"
+          element={
+            <ProtectedRoute>
+              {authState.user?.role === "user" ? (
+                <RecentAssessmentsList />
+              ) : (
+                <Navigate to="/" />
+              )}
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/user/results/:assessmentId"
+          element={
+            <ProtectedRoute>
+              {authState.user?.role === "user" ? (
+                <AssessmentTakingLayout>
+                  <AssessmentResultDetail />
+                </AssessmentTakingLayout>
               ) : (
                 <Navigate to="/" />
               )}

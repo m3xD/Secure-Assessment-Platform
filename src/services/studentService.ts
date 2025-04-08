@@ -81,7 +81,7 @@ const studentService = {
   async saveAnswer(attemptId: string, answerData: Answer): Promise<any> {
     try {
       const res = await mainApi.post(
-        `/student/attempts/${attemptId}/asnwers`,
+        `/student/attempts/${attemptId}/answers`,
         answerData
       );
       return res.data;

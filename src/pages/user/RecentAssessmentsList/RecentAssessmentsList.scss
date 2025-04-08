@@ -1,0 +1,52 @@
+.assessments-list {
+  background-color: var(--color-background);
+  margin-top: var(--header-height);
+  min-height: calc(100vh - var(--header-height));
+  padding: var(--padding-1);
+  
+  h1 {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+  
+  .assessment-list {
+    .assessment-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      
+      &:first-child {
+        padding-top: 0;
+      }
+      
+      &:last-child {
+        padding-bottom: 0;
+        border-bottom: none;
+      }
+    }
+    
+    .assessment-info {
+      flex: 1;
+      padding-right: 2rem;
+      
+      h5 {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+      
+      .assessment-meta {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 0.5rem;
+      }
+      
+      p {
+        margin-bottom: 0;
+        font-size: 0.9rem;
+      }
+    }
+  }
+}

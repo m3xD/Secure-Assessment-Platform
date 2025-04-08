@@ -31,8 +31,10 @@ export interface AssessmentResult {
     attemptId: string;
     assessmentId: string;
     title: string;
-    date: string;
+    startedAt: string;
+    submittedAt: string;
     score: number;
+    passingScore: number;
     duration: number;
     status: string;
     feedback: string;

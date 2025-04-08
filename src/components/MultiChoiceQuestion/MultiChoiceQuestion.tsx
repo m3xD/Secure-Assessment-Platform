@@ -20,16 +20,16 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
       <div className="options-list">
         {question.options.map(option => (
           <div 
-            key={option.id}
-            className={`option-item ${selectedAnswer === option.id ? 'selected' : ''}`}
-            onClick={() => onChange(option.id)}
+            key={option.optionId}
+            className={`option-item ${selectedAnswer === option.optionId ? 'selected' : ''}`}
+            onClick={() => onChange(option.optionId)}
           >
             <Form.Check
               type="radio"
-              id={`option-${option.id}`}
+              id={`option-${option.optionId}`}
               label={option.text}
-              checked={selectedAnswer === option.id}
-              onChange={() => onChange(option.id)}
+              checked={selectedAnswer === option.optionId}
+              onChange={() => onChange(option.optionId)}
             />
           </div>
         ))}

@@ -1,0 +1,181 @@
+.assessment-results-modal {
+  .modal-content {
+    border-radius: var(--border-radius);
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+  
+  .modal-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1.25rem 1.5rem;
+    
+    .modal-title {
+      font-weight: 600;
+      font-size: 1.25rem;
+    }
+  }
+  
+  .modal-body {
+    padding: 1.5rem;
+  }
+  
+  .modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+  }
+  
+  .results-content {
+    .assessment-title {
+      font-weight: 600;
+      margin-top: 1rem;
+      color: var(--color-dark);
+    }
+    
+    .result-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      font-weight: 600;
+      padding: 0.75rem 2.5rem;
+      border-radius: 50px;
+      
+      &.passed {
+        background-color: rgba(var(--success-rgb), 0.1);
+        color: var(--success);
+        
+        svg {
+          margin-right: 0.5rem;
+        }
+      }
+      
+      &.failed {
+        background-color: rgba(var(--danger-rgb), 0.1);
+        color: var(--danger);
+        
+        svg {
+          margin-right: 0.5rem;
+        }
+      }
+    }
+    
+    .score-display {
+      margin: 1.5rem 0;
+      
+      .score-circle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100px;
+        height: 100px;
+        background-color: rgba(var(--color-primary-rgb), 0.1);
+        border-radius: 50%;
+        margin: 0 auto;
+        
+        .score-value {
+          font-size: 2rem;
+          font-weight: 700;
+          color: var(--color-primary);
+        }
+      }
+    }
+    
+    .result-summary {
+      margin-top: 1rem;
+      background-color: rgba(0, 0, 0, 0.02);
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      
+      .summary-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem 0.5rem;
+        
+        .summary-icon {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          margin-bottom: 0.5rem;
+          
+          &.correct {
+            background-color: rgba(var(--success-rgb), 0.1);
+            color: var(--success);
+          }
+          
+          &.incorrect {
+            background-color: rgba(var(--danger-rgb), 0.1);
+            color: var(--danger);
+          }
+          
+          &.time {
+            background-color: transparent;
+            
+            .time-badge {
+              font-size: 0.85rem;
+              padding: 0.35rem 0.65rem;
+            }
+          }
+        }
+        
+        .summary-value {
+          font-size: 1.5rem;
+          font-weight: 600;
+          color: var(--color-dark);
+          margin: 0.25rem 0;
+        }
+        
+        .summary-label {
+          font-size: 0.9rem;
+          color: var(--color-gray);
+        }
+      }
+      
+      .performance-bar {
+        padding: 0.5rem 0.25rem;
+        
+        .performance-label {
+          font-size: 0.9rem;
+          margin-bottom: 0.5rem;
+          color: var(--color-gray);
+        }
+        
+        .progress-container {
+          height: 8px;
+          background-color: rgba(0, 0, 0, 0.05);
+          border-radius: 10px;
+          overflow: hidden;
+          
+          .progress-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1s ease-in-out;
+          }
+        }
+      }
+    }
+    
+    .feedback-section {
+      margin-top: 1.5rem;
+      background-color: rgba(var(--color-primary-rgb), 0.05);
+      padding: 1.25rem;
+      border-radius: var(--border-radius);
+      border-left: 3px solid var(--color-primary);
+      
+      h5 {
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        color: var(--color-primary);
+      }
+      
+      p {
+        margin-bottom: 0;
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+    }
+  }
+}

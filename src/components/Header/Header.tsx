@@ -29,8 +29,7 @@ const Header: React.FC = () => {
                 {authState.user?.role === "user" ? (
                   <>
                     <Nav.Link href="/user/dashboard">Dashboard</Nav.Link>
-                    <Nav.Link href="/user/quizzes">My Quizzes</Nav.Link>
-                    <Nav.Link href="/user/exams">My Exams List</Nav.Link>
+                    <Nav.Link href="/user/assessments">Recent Assessment</Nav.Link>
                   </>
                 ) : (
                   <>

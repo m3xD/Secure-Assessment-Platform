@@ -95,6 +95,9 @@ const UserDashboard: React.FC = () => {
       // Call the API to start the assessment
       const response = await studentService.startAssessment(assessmentId);
       
+      // Save the assessment data to session storage
+      sessionStorage.setItem(`assessment_${response.attemptId}`, JSON.stringify(response));
+      
       // Navigate to the assessment taking page
       navigate(`/user/assessments/take/${response.attemptId}`);
       

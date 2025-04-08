@@ -65,7 +65,7 @@ export const useAssessmentDetail = (assessmentId: string | undefined) => {
       if (currentAssessment.data) {
         dispatch({
           type: "SET_CURRENT_ASSESSMENT",
-          payload: { ...currentAssessment.data, status: "active" },
+          payload: { ...currentAssessment.data, status: "Active" },
         });
       }
       toast.success("Assessment published successfully!");
