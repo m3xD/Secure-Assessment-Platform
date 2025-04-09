@@ -54,3 +54,37 @@ export interface AssessmentPerformance {
   mostChallenging: mostChallenging[];
   mostSuccessful: mostSuccessful[];
 }
+
+/* -------------------------------- */
+
+export interface SuspiciousActivity {
+  userId: string;
+  assessmentId: string;
+  type:
+    | "TAB_SWITCHING"
+    | "FACE_NOT_DETECTED"
+    | "MULTIPLE_FACES"
+    | "LOOKING_AWAY"
+    | "SUSPICIOUS_OBJECT"
+    | "VOICE_DETECTED";
+  details: string;
+  timestamp: string;
+  userAgent: string;
+}
+
+export interface LogSuspiciousActivity {
+  id: string;
+  userId: string;
+  assessmentId: string;
+  type:
+    | "TAB_SWITCHING"
+    | "FACE_NOT_DETECTED"
+    | "MULTIPLE_FACES"
+    | "LOOKING_AWAY"
+    | "SUSPICIOUS_OBJECT"
+    | "VOICE_DETECTED";
+  details: string;
+  timestamp: string;
+  severity: "LOW" | "MEDIUM" | "HIGH";
+  reviewed: boolean; 
+}
