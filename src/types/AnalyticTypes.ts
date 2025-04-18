@@ -57,16 +57,18 @@ export interface AssessmentPerformance {
 
 /* -------------------------------- */
 
+export type SuspiciousActivityType = 
+  | "TAB_SWITCHING"
+  | "FACE_NOT_DETECTED"
+  | "MULTIPLE_FACES" 
+  | "LOOKING_AWAY"
+  | "SUSPICIOUS_OBJECT"
+  | "VOICE_DETECTED";
+
 export interface SuspiciousActivity {
-  userId: string;
+  // userId: string;
   assessmentId: string;
-  type:
-    | "TAB_SWITCHING"
-    | "FACE_NOT_DETECTED"
-    | "MULTIPLE_FACES"
-    | "LOOKING_AWAY"
-    | "SUSPICIOUS_OBJECT"
-    | "VOICE_DETECTED";
+  type: SuspiciousActivityType;
   details: string;
   timestamp: string;
   userAgent: string;
@@ -76,13 +78,7 @@ export interface LogSuspiciousActivity {
   id: string;
   userId: string;
   assessmentId: string;
-  type:
-    | "TAB_SWITCHING"
-    | "FACE_NOT_DETECTED"
-    | "MULTIPLE_FACES"
-    | "LOOKING_AWAY"
-    | "SUSPICIOUS_OBJECT"
-    | "VOICE_DETECTED";
+  type: SuspiciousActivityType;
   details: string;
   timestamp: string;
   severity: "LOW" | "MEDIUM" | "HIGH";

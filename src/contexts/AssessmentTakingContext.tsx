@@ -19,6 +19,17 @@ interface AssessmentTakingState {
   ui: {
     showResultModal: boolean;
   };
+  suspiciousActivity: {
+    type:
+      | "TAB_SWITCHING"
+      | "FACE_NOT_DETECTED"
+      | "MULTIPLE_FACES"
+      | "LOOKING_AWAY"
+      | "SUSPICIOUS_OBJECT"
+      | "VOICE_DETECTED"
+      | null;
+    tabSwitches: number;
+  };
 }
 
 // Initial state
@@ -34,6 +45,10 @@ const initialState: AssessmentTakingState = {
   submittedResult: null,
   ui: {
     showResultModal: false,
+  },
+  suspiciousActivity: {
+    type: null,
+    tabSwitches: 0,
   },
 };
 
@@ -57,7 +72,21 @@ type AssessmentTakingAction =
   | { type: "ADD_WEBCAM_WARNING" }
   | { type: "RESET_STATE" }
   | { type: "OPEN_RESULT_MODAL"; payload: SubmitAssessmentResponse }
-  | { type: "CLOSE_RESULT_MODAL" };
+  | { type: "CLOSE_RESULT_MODAL" }
+  | {
+      type: "LOG_SUSPICIOUS_ACTIVITY";
+      payload: {
+        type:
+          | "TAB_SWITCHING"
+          | "FACE_NOT_DETECTED"
+          | "MULTIPLE_FACES"
+          | "LOOKING_AWAY"
+          | "SUSPICIOUS_OBJECT"
+          | "VOICE_DETECTED";
+      };
+    }
+  | { type: "TAB_SWITCHING"; payload: number }
+  | { type: "CLEAR_SUSPICIOUS_ACTIVITY" };
 
 // Reducer function
 const assessmentTakingReducer = (
@@ -153,6 +182,33 @@ const assessmentTakingReducer = (
           showResultModal: false,
         },
         submittedResult: null,
+      };
+
+    case "LOG_SUSPICIOUS_ACTIVITY":
+      return {
+        ...state,
+        suspiciousActivity: {
+          ...state.suspiciousActivity,
+          type: action.payload.type,
+        },
+      };
+
+    case "CLEAR_SUSPICIOUS_ACTIVITY":
+      return {
+        ...state,
+        suspiciousActivity: {
+          ...state.suspiciousActivity,
+          type: null,
+        },
+      };
+
+    case "TAB_SWITCHING":
+      return {
+        ...state,
+        suspiciousActivity: {
+          ...state.suspiciousActivity,
+          tabSwitches: action.payload,
+        },
       };
 
     default:

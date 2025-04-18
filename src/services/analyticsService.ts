@@ -1,3 +1,7 @@
+import {
+  LogSuspiciousActivity,
+  SuspiciousActivity,
+} from "./../types/AnalyticTypes";
 import { AssessmentPerformance, UserActivity } from "../types/AnalyticTypes";
 import { mainApi } from "../utils/AxiosInterceptor";
 
@@ -31,7 +35,24 @@ const analyticsService = {
   },
 
   /**
-   *
+   * Reports suspicious activity during an assessment
+   * @param {SuspiciousActivity} suspiciousActivity - The suspicious activity data to be logged
+   * @returns {Promise<LogSuspiciousActivity>} Promise object represents the analytics data
    */
+  async logSuspiciousActivity(
+    suspiciousActivity: SuspiciousActivity
+  ): Promise<LogSuspiciousActivity> {
+    try {
+      const logSuspiciousActivity: LogSuspiciousActivity = await mainApi.post(
+        `/analytics/suspicious`,
+        suspiciousActivity
+      );
+      return logSuspiciousActivity;
+    } catch (error) {
+      throw new Error("Failed to log suspicious activity");
+    }
+  },
+
+  
 };
 export default analyticsService;

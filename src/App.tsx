@@ -23,6 +23,7 @@ import UserLayout from "./layout/UserLayout";
 import AssessmentTakingLayout from "./layout/AssessmentTakingLayout";
 import RecentAssessmentsList from "./pages/user/RecentAssessmentsList/RecentAssessmentsList";
 import AssessmentResultDetail from "./pages/user/AssessmentResultDetail/AssessmentResultDetail";
+import FaceRegister from "./pages/user/FaceRegister/FaceRegister";
 
 // Create a protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -123,6 +124,19 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/user/face-register"
+          element={
+            <ProtectedRoute>
+              {authState.user?.role === "user" ? (
+                <FaceRegister />
+              ) : (
+                <Navigate to="/" />
+              )}
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/user/assessments/take/:attemptId"
           element={

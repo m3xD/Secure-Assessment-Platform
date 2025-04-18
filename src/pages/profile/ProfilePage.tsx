@@ -14,8 +14,10 @@ import "./ProfilePage.scss";
 import { toast } from "react-toastify";
 import { useUserService } from "../../hooks/useUserService";
 import defaultAvatar from "../../assets/avatar.jpg";
+import { useNavigate } from "react-router-dom";
 
 const ProfilePage = () => {
+  const navigate = useNavigate();
   const { authState } = useAuth();
   const { updateUser } = useUserService();
   const [editing, setEditing] = useState(false);
@@ -89,7 +91,7 @@ const ProfilePage = () => {
                   alt="Profile"
                   className="profile-avatar"
                 />
-                <button className="avatar-edit-btn">
+                <button className="avatar-edit-btn" onClick={() => navigate('/user/face-register')}>
                   <Camera size={16} />
                 </button>
               </div>

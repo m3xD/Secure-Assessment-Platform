@@ -7,7 +7,7 @@ export interface AssessmentSettings {
   maxAttempts: number;
   timeLimitEnforced: boolean;
   requireWebcam: boolean;
-  preventTabSwitching: true;
+  preventTabSwitching: boolean;
   requireIdentityVerification: boolean;
 }
 
