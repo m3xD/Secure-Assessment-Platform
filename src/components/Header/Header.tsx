@@ -9,18 +9,29 @@ const Header: React.FC = () => {
   const { authState, logout } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout(getRefreshTokenFromLocalStorage() || "");
-    localStorage.removeItem("token");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("userData");
-    navigate("/signin");
+  const handleLogout = async () => {
+    try {
+      await logout(getRefreshTokenFromLocalStorage() || "");
+
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("userData");
+
+      navigate("/signin");
+    } catch (error) {
+      console.error("Error during logout:", error);
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("userData");
+
+      navigate("/signin");
+    }
   };
 
   return (
     <Navbar expand="lg" className="header">
       <Container>
-        <Navbar.Brand href="/">Quiz Monitor</Navbar.Brand>
+        <Navbar.Brand href="/">Secure Assessment Platform</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           {authState.isAuthenticated ? (
@@ -29,12 +40,16 @@ const Header: React.FC = () => {
                 {authState.user?.role === "user" ? (
                   <>
                     <Nav.Link href="/user/dashboard">Dashboard</Nav.Link>
-                    <Nav.Link href="/user/assessments">Recent Assessment</Nav.Link>
+                    <Nav.Link href="/user/assessments">
+                      Recent Assessment
+                    </Nav.Link>
                   </>
                 ) : (
                   <>
                     <Nav.Link href="/admin/dashboard">Dashboard</Nav.Link>
-                    <Nav.Link href="/admin/assessments">Manage Assessment</Nav.Link>
+                    <Nav.Link href="/admin/assessments">
+                      Manage Assessment
+                    </Nav.Link>
                     <Nav.Link href="/admin/users">Manage User</Nav.Link>
                   </>
                 )}

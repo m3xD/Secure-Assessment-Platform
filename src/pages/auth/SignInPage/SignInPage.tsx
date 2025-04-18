@@ -37,7 +37,7 @@ const SignInPage: React.FC = () => {
       <Row className="min-vh-100">
         <Col md={6} className="signin-left d-none d-md-flex">
           <div className="brand-wrapper">
-            <h1>Quiz Monitor</h1>
+            <h1>Secure Assessment Platform</h1>
             <p>Monitor student progress in real-time</p>
           </div>
         </Col>

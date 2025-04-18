@@ -49,7 +49,7 @@ const SignUpPage: React.FC = () => {
           <div className="signup-form-wrapper">
             <div className="text-center mb-4">
               <h2>Create Account</h2>
-              <p className="text-muted">Join us to start monitoring quizzes</p>
+              <p className="text-muted">Join us to start monitoring assessments</p>
             </div>
 
             {error && <Alert variant="danger">{error}</Alert>}
@@ -164,9 +164,9 @@ const SignUpPage: React.FC = () => {
           <div className="features-wrapper">
             <h3>Why Choose Us?</h3>
             <ul className="features-list">
-              <li>Real-time quiz monitoring</li>
+              <li>Advanced Proctoring Capabilities</li>
               <li>Detailed analytics and reports</li>
-              <li>Easy quiz management</li>
+              <li>Easy assessments management</li>
               <li>Secure and reliable platform</li>
             </ul>
           </div>
