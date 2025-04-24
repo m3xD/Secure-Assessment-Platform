@@ -3,6 +3,7 @@ import { toast } from 'react-toastify';
 import { captureImageFromVideo, resizeBase64Image } from '../utils/imageUtils';
 import { useAuth } from './useAuth';
 import { mainApi } from '../utils/AxiosInterceptor';
+import axios from 'axios';
 
 export const useFaceRegistration = () => {
   const { authState } = useAuth();
@@ -93,7 +94,7 @@ export const useFaceRegistration = () => {
   }, []);
   
   const captureImage = useCallback(async () => {
-    if (!videoRef.current || capturedImages.length >= 5) return;
+    if (!videoRef.current || capturedImages.length >= 3) return;
     
     try {
       setIsCapturing(true);
@@ -113,8 +114,8 @@ export const useFaceRegistration = () => {
       
       // Update progress message
       const newCount = capturedImages.length + 1;
-      if (newCount < 5) {
-        setProgressMessage(`${newCount}/5 captured. Please continue.`);
+      if (newCount < 3) {
+        setProgressMessage(`${newCount}/3 captured. Please continue.`);
       } else {
         setProgressMessage('All images captured. Ready to submit.');
       }
@@ -135,8 +136,8 @@ export const useFaceRegistration = () => {
   }, []);
   
   const submitRegistration = useCallback(async () => {
-    if (capturedImages.length !== 5 || !authState.user?.id) {
-      setErrorMessage('Please capture all 5 images before submitting');
+    if (capturedImages.length !== 3 || !authState.user?.id) {
+      setErrorMessage('Please capture all 3 images before submitting');
       return;
     }
     
@@ -146,20 +147,23 @@ export const useFaceRegistration = () => {
     try {
       // Prepare data for API
       const registrationData = {
-        userId: authState.user.id,
+        name: authState.user.name,
         images: capturedImages,
-        timestamp: new Date().toISOString()
       };
+
+      console.log('Registration data for face register:', registrationData);
       
       // Send to API
-      const response = await mainApi.post('/users/face-registration', registrationData);
+      const response = await axios.post('http://139.59.126.157:8081/register', registrationData);
       
-      if (response.status === 200 || response.status === 201) {
+      if (response.status === 200) {
+        console.log('Face registration successful:', response);
         setIsComplete(true);
         setProgressMessage('Registration successful!');
         toast.success('Face registration completed successfully!');
       } else {
-        throw new Error('API returned an error response');
+        toast.error('Face registration failed. Please try again.');
+        resetCapture();
       }
       
     } catch (err) {
@@ -169,7 +173,7 @@ export const useFaceRegistration = () => {
     } finally {
       setIsRegistering(false);
     }
-  }, [capturedImages, authState.user?.id]);
+  }, [capturedImages, authState.user?.name]);
   
   return {
     videoRef,
