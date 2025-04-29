@@ -20,7 +20,7 @@ export interface Assessment {
   status: string;
   dueDate: string;
   createdBy: string;
-  createdDate: string;
+  createdAt: string;
   attempts: number;
   passingScore: number;
   questionCount: number;

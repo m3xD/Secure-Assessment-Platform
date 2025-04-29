@@ -1,6 +1,8 @@
 import {
   ActivityTimeline,
   AdminDashboardSummary,
+  StudentAttemptHistory,
+  StudentAttemptHistoryDetails,
   SystemStatus,
 } from "./../types/AdminServiceTypes";
 
@@ -52,6 +54,49 @@ const adminService = {
       return systemStatusData;
     } catch (error) {
       throw new Error("Failed to fetch system status");
+    }
+  },
+
+  /**
+   * Returns the attempts list of a specific assessment for a specific user
+   * @param {string} assessmentId - Assessment ID
+   * @param {string} userId - User ID
+   * @returns {Promise<StudentAttemptHistory[]>} - List of attempts
+   */
+  async getStudentAttemptHistory(
+    assessmentId: string,
+    userId: string
+  ): Promise<StudentAttemptHistory[]> {
+    try {
+      const res = await mainApi.get(
+        `/admin/attempts/${assessmentId}/users/${userId}`
+      );
+      const studentAttemptHistory: StudentAttemptHistory[] = res.data.content;
+      return studentAttemptHistory;
+    } catch (error) {
+      throw new Error("Failed to fetch student attempt history");
+    }
+  },
+
+  /**
+   * Returns the details of a specific attempt
+   * @param {string} attemptId - Attempt ID
+   * @param {string} userId - User ID
+   * @returns {Promise<StudentAttemptHistoryDetails>} - Attempt details
+   */
+  async getStudentAttemptHistoryDetails(
+    attemptId: string,
+    userId: string
+  ): Promise<StudentAttemptHistoryDetails> {
+    try {
+      const res = await mainApi.get(
+        `/admin/attempt/${attemptId}/users/${userId}`
+      );
+      const studentAttemptHistoryDetails: StudentAttemptHistoryDetails =
+        res.data;
+      return studentAttemptHistoryDetails;
+    } catch (error) {
+      throw new Error("Failed to fetch student attempt history details");
     }
   },
 };

@@ -1,0 +1,133 @@
+import { useCallback, useEffect, useReducer } from "react";
+import {
+  StudentAttemptHistory,
+  StudentAttemptHistoryDetails,
+} from "../types/AdminServiceTypes";
+import adminService from "../services/adminService";
+import { Question } from "../types/QuestionTypes";
+import questionsService from "../services/questionsService";
+
+interface ReviewAttemptState {
+  attemptList: StudentAttemptHistory[];
+  attemptDetails: StudentAttemptHistoryDetails;
+  questionsList: Question[];
+  loading: boolean;
+  error: string | null;
+}
+
+type ReviewAttemptStateAction =
+  | { type: "SET_ATTEMPT_LIST"; payload: StudentAttemptHistory[] }
+  | { type: "SET_ATTEMPT_DETAILS"; payload: StudentAttemptHistoryDetails }
+  | { type: "SET_QUESTION_LIST"; payload: Question[] }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "SET_ERROR"; payload: string | null };
+
+const initialState: ReviewAttemptState = {
+  attemptList: [],
+  attemptDetails: {} as StudentAttemptHistoryDetails,
+  questionsList: [],
+  loading: false,
+  error: null,
+};
+
+// Reducer
+const reviewAttemptReducer = (
+  state: ReviewAttemptState,
+  action: ReviewAttemptStateAction
+): ReviewAttemptState => {
+  switch (action.type) {
+    case "SET_ATTEMPT_LIST":
+      return {
+        ...state,
+        attemptList: action.payload,
+        loading: false,
+      };
+    case "SET_ATTEMPT_DETAILS":
+      return {
+        ...state,
+        attemptDetails: action.payload,
+        loading: false,
+      };
+    case "SET_QUESTION_LIST":
+      return {
+        ...state,
+        questionsList: action.payload,
+      };
+    case "SET_LOADING":
+      return {
+        ...state,
+        loading: action.payload,
+      };
+    case "SET_ERROR":
+      return {
+        ...state,
+        error: action.payload,
+      };
+
+    default:
+      return state;
+  }
+};
+
+export const useReviewAttempt = (assessmentId: string, userId: string) => {
+  const [state, dispatch] = useReducer(reviewAttemptReducer, initialState);
+
+  const fetchAttemptList = useCallback(async () => {
+    try {
+      if (!assessmentId || !userId) return;
+
+      dispatch({ type: "SET_LOADING", payload: true });
+      const attemptList = await adminService.getStudentAttemptHistory(
+        assessmentId,
+        userId
+      );
+
+      dispatch({ type: "SET_ATTEMPT_LIST", payload: attemptList });
+    } catch (error) {
+      console.error("Error fetching attempt list:", error);
+      dispatch({
+        type: "SET_ERROR",
+        payload: "Failed to load attempt list. Please try again.",
+      });
+    }
+  }, [assessmentId, userId, dispatch]);
+
+  const fetchAttemptDetails = useCallback(
+    async (attemptId: string) => {
+      if (!assessmentId || !userId) return;
+
+      dispatch({ type: "SET_LOADING", payload: true });
+      const attemptDetails = await adminService.getStudentAttemptHistoryDetails(
+        attemptId,
+        userId
+      );
+
+      dispatch({ type: "SET_ATTEMPT_DETAILS", payload: attemptDetails });
+    },
+    [assessmentId, userId, dispatch]
+  );
+
+  const fetchQuestionList = useCallback(async () => {
+    if (!assessmentId) return;
+
+    const questionsList = await questionsService.getAssessmentQuestions(
+      assessmentId
+    );
+    console.log(">>>> check questionsList", questionsList);
+    dispatch({ type: "SET_QUESTION_LIST", payload: questionsList });
+  }, []);
+
+  useEffect(() => {
+    fetchAttemptList();
+    fetchQuestionList();
+  }, []);
+
+  return {
+    studentAttemptHistory: state.attemptList,
+    studentAttempHistoryDetail: state.attemptDetails,
+    questionsList: state.questionsList,
+    loading: state.loading,
+    error: state.error,
+    fetchAttemptDetails,
+  };
+};

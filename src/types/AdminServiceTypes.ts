@@ -1,3 +1,4 @@
+
 export interface UsersSummary {
     total: number;
     active: number;
@@ -69,3 +70,46 @@ export interface SystemStatus {
     };
     lastChecked: string;
 }
+
+/* --------------------------------------- */ 
+
+export interface StudentAttemptHistory {
+    id: string;
+    userId: string;
+    assemssmentId: string;
+    startedAt: string;
+    endedAt: string;
+    submittedAt: string;
+    score: number;
+    duration: number;
+    status: string;
+    createdAt: string;
+    updatedAt: string;
+    feedback: string;
+};
+
+export interface AnswersHistory {
+    id: string;
+    attemptId: string;
+    questionId: string;
+    answer: string;
+    isCorrect: boolean;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface StudentAttemptHistoryDetails {
+    id: string;
+    userId: string;
+    assessmentId: string;
+    startedAt: string;
+    endedAt: string;
+    submittedAt: string;
+    score: number;
+    duration: string;
+    status: string;
+    answers: AnswersHistory[];
+    createdAt: string;
+    updatedAt: string;
+    feedback: string;
+};

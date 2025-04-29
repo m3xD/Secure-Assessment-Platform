@@ -51,7 +51,7 @@ const AssessmentsTable: React.FC = () => {
         passingScore: assessment.passingScore,
         id: assessment.id,
         createdBy: assessment.createdBy,
-        createdDate: assessment.createdDate,
+        createdAt: assessment.createdAt,
         attempts: assessment.attempts,
         questionCount: assessment.questionCount
       }
@@ -137,7 +137,7 @@ const AssessmentsTable: React.FC = () => {
             <td>{renderStatusBadge(assessment.status)}</td>
             <td>{assessment.questionCount}</td>
             <td>{assessment.duration} min</td>
-            <td>{new Date(assessment.createdDate).toLocaleDateString()}</td>
+            <td>{new Date(assessment.createdAt).toLocaleDateString()}</td>
             <td>
               <div className="d-flex">
                 <Button

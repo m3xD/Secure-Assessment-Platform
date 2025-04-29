@@ -223,7 +223,7 @@ const AssessmentModal: React.FC = () => {
                   isInvalid={!!errors.status}
                 >
                   <option value="draft">Draft</option>
-                  <option value="published">Published</option>
+                  <option value="active">Published</option>
                 </Form.Select>
                 <Form.Control.Feedback type="invalid">
                   {errors.status}
