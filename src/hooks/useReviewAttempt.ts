@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useReducer } from "react";
 import {
+  Answer,
   StudentAttemptHistory,
   StudentAttemptHistoryDetails,
 } from "../types/AdminServiceTypes";
 import adminService from "../services/adminService";
 import { Question } from "../types/QuestionTypes";
 import questionsService from "../services/questionsService";
+import { toast } from "react-toastify";
 
 interface ReviewAttemptState {
   attemptList: StudentAttemptHistory[];
@@ -117,6 +119,32 @@ export const useReviewAttempt = (assessmentId: string, userId: string) => {
     dispatch({ type: "SET_QUESTION_LIST", payload: questionsList });
   }, []);
 
+  const gradeAttempt = useCallback(
+    async (
+      attemptId: string,
+      feedback?: string,
+      score?: number,
+      answers?: Answer[]
+    ) => {
+      if (!attemptId) return;
+      try {
+        const res = await adminService.gradeAttempt(
+          attemptId,
+          feedback,
+          score,
+          answers
+        );
+        toast.success("Attempt graded successfully!");
+        return res;
+      } catch (error) {
+        console.error("Error grading attempt:", error);
+        toast.error("Failed to grade attempt. Please try again.");
+        return;
+      }
+    },
+    []
+  );
+
   useEffect(() => {
     fetchAttemptList();
     fetchQuestionList();
@@ -129,5 +157,6 @@ export const useReviewAttempt = (assessmentId: string, userId: string) => {
     loading: state.loading,
     error: state.error,
     fetchAttemptDetails,
+    gradeAttempt,
   };
 };

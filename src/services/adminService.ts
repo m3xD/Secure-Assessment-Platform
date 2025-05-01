@@ -1,6 +1,7 @@
 import {
   ActivityTimeline,
   AdminDashboardSummary,
+  Answer,
   StudentAttemptHistory,
   StudentAttemptHistoryDetails,
   SystemStatus,
@@ -97,6 +98,39 @@ const adminService = {
       return studentAttemptHistoryDetails;
     } catch (error) {
       throw new Error("Failed to fetch student attempt history details");
+    }
+  },
+
+  /**
+   * Grade a student's assessment attempt
+   * @param {string} attemptId - Attempt ID
+   * @param {string} feedback - Feedback for the attempt
+   * @param {number} score - Score for the attempt
+   * @param {Answer[]} answers - Answers for the attempt
+   * @returns {Promise<any>} - Result of the update attempt
+   */
+  async gradeAttempt(
+    attemptId: string,
+    feedback?: string,
+    score?: number,
+    answers?: Answer[]
+  ): Promise<any> {
+    try {
+      const reqData: any = {};
+      if (feedback !== undefined) reqData.feedback = feedback;
+      if (score !== undefined) reqData.score = score;
+      if (answers !== undefined) reqData.answers = answers;
+
+      console.log(">>> check reqData: ", reqData);
+
+      const res = await mainApi.post(
+        `/admin/attempt/grade/${attemptId}`,
+        reqData
+      );
+      console.log(">>> check res gradeAttempt: ", res);
+      return res.data;
+    } catch (error) {
+      throw new Error("Failed to update attempt");
     }
   },
 };

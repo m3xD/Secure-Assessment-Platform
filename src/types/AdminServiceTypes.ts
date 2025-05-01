@@ -98,6 +98,11 @@ export interface AnswersHistory {
     updatedAt: string;
 }
 
+export interface Answer {
+    id: string;
+    isCorrect: boolean;
+}
+
 export interface StudentAttemptHistoryDetails {
     id: string;
     userId: string;

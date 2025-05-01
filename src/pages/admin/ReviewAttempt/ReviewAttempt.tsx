@@ -1,12 +1,30 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./ReviewAttempt.scss";
 import { useNavigate, useParams } from "react-router-dom";
 import { useReviewAttempt } from "../../../hooks/useReviewAttempt";
-import { 
-  Container, Card, Table, Badge, Button, Row, Col, Nav, Spinner, Alert,
-  Accordion, Form
+import {
+  Container,
+  Card,
+  Table,
+  Badge,
+  Button,
+  Row,
+  Col,
+  Nav,
+  Spinner,
+  Alert,
+  Accordion,
+  Form,
 } from "react-bootstrap";
-import { ArrowLeft, Clock, CheckCircle, XCircle, Flag, Eye } from "react-feather";
+import {
+  ArrowLeft,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Flag,
+  Eye,
+} from "react-feather";
+import { Answer } from "../../../types/AdminServiceTypes";
 
 const ReviewAttempt: React.FC = () => {
   const { assessmentId, userId } = useParams<{
@@ -14,7 +32,9 @@ const ReviewAttempt: React.FC = () => {
     userId: string | undefined;
   }>();
   const navigate = useNavigate();
-  const [selectedAttemptId, setSelectedAttemptId] = useState<string | null>(null);
+  const [selectedAttemptId, setSelectedAttemptId] = useState<string | null>(
+    null
+  );
 
   if (!assessmentId || !userId) {
     console.error("Missing assessmentId or userId");
@@ -27,12 +47,46 @@ const ReviewAttempt: React.FC = () => {
     questionsList,
     loading,
     fetchAttemptDetails,
+    gradeAttempt,
   } = useReviewAttempt(assessmentId, userId);
 
   const handleAttemptSelect = (attemptId: string) => {
     setSelectedAttemptId(attemptId);
     fetchAttemptDetails(attemptId);
   };
+
+  const [feedback, setFeedback] = useState<string>("");
+  const [score, setScore] = useState<number>(0);
+  const [answers, setAnswers] = useState<Answer[]>([]);
+
+  useEffect(() => {
+    if (studentAttempHistoryDetail) {
+      setFeedback(studentAttempHistoryDetail.feedback || "");
+      setScore(Number(studentAttempHistoryDetail.score?.toFixed(1)) || 0);
+    }
+  }, [studentAttempHistoryDetail]);
+
+  useEffect(() => {
+    if (studentAttempHistoryDetail?.answers && questionsList) {
+      // Filter essay question answers and map to only keep id and isCorrect
+      setAnswers(
+        studentAttempHistoryDetail.answers
+          .filter((answer) => {
+            // Find essay questions
+            return questionsList.some(
+              (question) =>
+                question.id === answer.questionId && question.type === "essay"
+            );
+          })
+          .map((answer) => ({
+            id: answer.id,
+            isCorrect: answer.isCorrect || false, // Default to false for essay questions
+          }))
+      );
+    }
+  }, [studentAttempHistoryDetail, questionsList]);
+
+  console.log("Answers state:", answers);
 
   const formatDate = (dateString: string) => {
     if (!dateString) return "N/A";
@@ -42,7 +96,7 @@ const ReviewAttempt: React.FC = () => {
       month: "short",
       day: "numeric",
       hour: "2-digit",
-      minute: "2-digit"
+      minute: "2-digit",
     });
   };
 
@@ -96,9 +150,13 @@ const ReviewAttempt: React.FC = () => {
                       </thead>
                       <tbody>
                         {studentAttemptHistory?.map((attempt) => (
-                          <tr 
+                          <tr
                             key={attempt.id}
-                            className={attempt.id === selectedAttemptId ? "table-active" : ""}
+                            className={
+                              attempt.id === selectedAttemptId
+                                ? "table-active"
+                                : ""
+                            }
                           >
                             <td>{formatDate(attempt.submittedAt)}</td>
                             <td>{attempt.score?.toFixed(1)}%</td>
@@ -106,7 +164,11 @@ const ReviewAttempt: React.FC = () => {
                             <td>
                               <Button
                                 size="sm"
-                                variant={attempt.id === selectedAttemptId ? "primary" : "outline-primary"}
+                                variant={
+                                  attempt.id === selectedAttemptId
+                                    ? "primary"
+                                    : "outline-primary"
+                                }
                                 onClick={() => handleAttemptSelect(attempt.id)}
                               >
                                 <Eye size={14} className="me-1" />
@@ -145,7 +207,9 @@ const ReviewAttempt: React.FC = () => {
                             <div className="summary-stat-value">
                               {studentAttempHistoryDetail.score?.toFixed(1)}%
                             </div>
-                            <div className="summary-stat-label">Final Score</div>
+                            <div className="summary-stat-label">
+                              Final Score
+                            </div>
                           </div>
                         </Col>
 
@@ -161,7 +225,8 @@ const ReviewAttempt: React.FC = () => {
                         <Col md={4}>
                           <div className="summary-stat-item">
                             <div className="summary-stat-value">
-                              {studentAttempHistoryDetail.status === "passed" ? (
+                              {studentAttempHistoryDetail.status ===
+                              "passed" ? (
                                 <CheckCircle className="text-success" />
                               ) : (
                                 <XCircle className="text-danger" />
@@ -177,24 +242,24 @@ const ReviewAttempt: React.FC = () => {
                       <div className="student-info mt-4">
                         {/* <h6>Student Information</h6> */}
                         <Row>
-                          {/* <Col md={6}>
-                            <div className="info-item">
-                              <div className="info-label">Name:</div>
-                              <div className="info-value">{studentAttempHistoryDetail.studentName}</div>
-                            </div>
-                            <div className="info-item">
-                              <div className="info-label">Email:</div>
-                              <div className="info-value">{studentAttempHistoryDetail.studentEmail}</div>
-                            </div>
-                          </Col> */}
-                          <Col md={12}>
+                          <Col md={6}>
                             <div className="info-item">
                               <div className="info-label">Started:</div>
-                              <div className="info-value">{formatDate(studentAttempHistoryDetail.startedAt)}</div>
+                              <div className="info-value">
+                                {formatDate(
+                                  studentAttempHistoryDetail.startedAt
+                                )}
+                              </div>
                             </div>
+                          </Col>
+                          <Col md={6}>
                             <div className="info-item">
                               <div className="info-label">Submitted:</div>
-                              <div className="info-value">{formatDate(studentAttempHistoryDetail.submittedAt)}</div>
+                              <div className="info-value">
+                                {formatDate(
+                                  studentAttempHistoryDetail.submittedAt
+                                )}
+                              </div>
                             </div>
                           </Col>
                         </Row>
@@ -208,135 +273,302 @@ const ReviewAttempt: React.FC = () => {
                     </Card.Header>
                     <Card.Body className="p-0">
                       <Accordion>
-                        {studentAttempHistoryDetail.answers?.map((answer, index) => {
-                          // Find matching question from questionsList
-                          const question = questionsList?.find(q => q.id === answer.questionId);
-                          
-                          return (
-                            <Accordion.Item key={answer.questionId} eventKey={answer.questionId}>
-                              <Accordion.Header>
-                                <div className="d-flex w-100 justify-content-between align-items-center">
-                                  <div>
-                                    <Badge bg="secondary" className="me-2">{index + 1}</Badge>
-                                    <span>{question?.text}</span>
-                                  </div>
-                                  <div>
-                                    {answer.isCorrect ? (
-                                      <Badge bg="success">Correct</Badge>
-                                    ) : (
-                                      <Badge bg="danger">Incorrect</Badge>
-                                    )}
-                                  </div>
-                                </div>
-                              </Accordion.Header>
-                              <Accordion.Body>
-                                <div className="question-detail">
-                                  <div className="question-text mb-3">
-                                    <h5>{question?.text}</h5>
-                                  </div>
-                                  
-                                  {/* Display options for multiple choice questions */}
-                                  {question && question.type === "multiple-choice" && question.options?.length > 0 && (
-                                    <div className="options mb-4">
-                                      <div className="options-container">
-                                        {question.options.map(option => (
-                                          <div key={option.optionId} className="option-item">
-                                            <div className={`option ${option.optionId === question.correctAnswer ? "correct-option" : ""} ${option.text === answer.answer ? "student-selected-option" : ""}`}>
-                                              <span className="option-text">{option.text}</span>
-                                              {option.optionId === question.correctAnswer && (
-                                                <Badge bg="success" className="ms-2">Correct Answer</Badge>
-                                              )}
-                                              {option.optionId === answer.answer && (
-                                                <Badge bg="danger" className="ms-2">Student's Selection</Badge>
-                                              )}
-                                            </div>
-                                          </div>
-                                        ))}
-                                      </div>
+                        {studentAttempHistoryDetail.answers?.map(
+                          (answer, index) => {
+                            // Find matching question from questionsList
+                            const question = questionsList?.find(
+                              (q) => q.id === answer.questionId
+                            );
+
+                            return (
+                              <Accordion.Item
+                                key={answer.id}
+                                eventKey={answer.questionId}
+                              >
+                                <Accordion.Header>
+                                  <div className="d-flex w-100 justify-content-between align-items-center">
+                                    <div>
+                                      <Badge bg="secondary" className="me-2">
+                                        {index + 1}
+                                      </Badge>
+                                      <span>{question?.text}</span>
                                     </div>
-                                  )}
-                                  
-                                  {/* For true/false questions - display predefined options */}
-                                  {question && question.type === "true-false" && (
-                                    <div className="options mb-4">
-                                      <div className="options-container">
-                                        <div className="option-item">
-                                          <div className={`option ${question.correctAnswer === "true" ? "correct-option" : ""} ${answer.answer === "true" ? "student-selected-option" : ""}`}>
-                                            <span className="option-text">True</span>
-                                            {question.correctAnswer === "true" && (
-                                              <Badge bg="success" className="ms-2">Correct Answer</Badge>
-                                            )}
-                                            {answer.answer === "true" && question.correctAnswer !== "true" && (
-                                              <Badge bg="danger" className="ms-2">Student's Selection</Badge>
-                                            )}
-                                          </div>
-                                        </div>
-                                        <div className="option-item">
-                                          <div className={`option ${question.correctAnswer === "false" ? "correct-option" : ""} ${answer.answer === "false" ? "student-selected-option" : ""}`}>
-                                            <span className="option-text">False</span>
-                                            {question.correctAnswer === "false" && (
-                                              <Badge bg="success" className="ms-2">Correct Answer</Badge>
-                                            )}
-                                            {answer.answer === "false" && question.correctAnswer !== "false" && (
-                                              <Badge bg="danger" className="ms-2">Student's Selection</Badge>
-                                            )}
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  )}
-                                  
-                                  <div className="student-response mb-4">
-                                    <h6 className="response-header">
-                                      <span className="me-2">Student's Response</span>
-                                      {answer.isCorrect ? (
+                                    <div>
+                                      {answer.isCorrect === null ? (
+                                        <Badge>Not grading</Badge>
+                                      ) : answer.isCorrect ? (
                                         <Badge bg="success">Correct</Badge>
                                       ) : (
                                         <Badge bg="danger">Incorrect</Badge>
                                       )}
-                                    </h6>
-                                    
-                                    {/* Display student answer based on question type */}
-                                    {question?.type === "essay" ? (
-                                      <div className="essay-answer p-3 border rounded">
-                                        {answer.answer || "No response provided"}
-                                      </div>
-                                    ) : question?.type === "true-false" ? (
-                                      <div className="selected-answer p-2">
-                                        <div className={`selected-option ${answer.isCorrect ? "bg-success-subtle" : "bg-danger-subtle"} p-2 rounded`}>
-                                          {answer.answer || "No response provided"}
+                                    </div>
+                                  </div>
+                                </Accordion.Header>
+                                <Accordion.Body>
+                                  <div className="question-detail">
+                                    <div className="question-text mb-3">
+                                      <h5>{question?.text}</h5>
+                                    </div>
+
+                                    {/* Display options for multiple choice questions */}
+                                    {question &&
+                                      question.type === "multiple-choice" &&
+                                      question.options?.length > 0 && (
+                                        <div className="options mb-4">
+                                          <div className="options-container">
+                                            {question.options.map((option) => (
+                                              <div
+                                                key={option.optionId}
+                                                className="option-item"
+                                              >
+                                                <div
+                                                  className={`option ${
+                                                    option.optionId ===
+                                                    question.correctAnswer
+                                                      ? "correct-option"
+                                                      : ""
+                                                  } ${
+                                                    option.text ===
+                                                    answer.answer
+                                                      ? "student-selected-option"
+                                                      : ""
+                                                  }`}
+                                                >
+                                                  <span className="option-text">
+                                                    {option.text}
+                                                  </span>
+                                                  {option.optionId ===
+                                                    question.correctAnswer && (
+                                                    <Badge
+                                                      bg="success"
+                                                      className="ms-2"
+                                                    >
+                                                      Correct Answer
+                                                    </Badge>
+                                                  )}
+                                                  {option.optionId ===
+                                                    answer.answer && (
+                                                    <Badge
+                                                      bg="danger"
+                                                      className="ms-2"
+                                                    >
+                                                      Student's Selection
+                                                    </Badge>
+                                                  )}
+                                                </div>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+
+                                    {/* For true/false questions - display predefined options */}
+                                    {question &&
+                                      question.type === "true-false" && (
+                                        <div className="options mb-4">
+                                          <div className="options-container">
+                                            <div className="option-item">
+                                              <div
+                                                className={`option ${
+                                                  question.correctAnswer ===
+                                                  "true"
+                                                    ? "correct-option"
+                                                    : ""
+                                                } ${
+                                                  answer.answer === "true"
+                                                    ? "student-selected-option"
+                                                    : ""
+                                                }`}
+                                              >
+                                                <span className="option-text">
+                                                  True
+                                                </span>
+                                                {question.correctAnswer ===
+                                                  "true" && (
+                                                  <Badge
+                                                    bg="success"
+                                                    className="ms-2"
+                                                  >
+                                                    Correct Answer
+                                                  </Badge>
+                                                )}
+                                                {answer.answer === "true" &&
+                                                  question.correctAnswer !==
+                                                    "true" && (
+                                                    <Badge
+                                                      bg="danger"
+                                                      className="ms-2"
+                                                    >
+                                                      Student's Selection
+                                                    </Badge>
+                                                  )}
+                                              </div>
+                                            </div>
+                                            <div className="option-item">
+                                              <div
+                                                className={`option ${
+                                                  question.correctAnswer ===
+                                                  "false"
+                                                    ? "correct-option"
+                                                    : ""
+                                                } ${
+                                                  answer.answer === "false"
+                                                    ? "student-selected-option"
+                                                    : ""
+                                                }`}
+                                              >
+                                                <span className="option-text">
+                                                  False
+                                                </span>
+                                                {question.correctAnswer ===
+                                                  "false" && (
+                                                  <Badge
+                                                    bg="success"
+                                                    className="ms-2"
+                                                  >
+                                                    Correct Answer
+                                                  </Badge>
+                                                )}
+                                                {answer.answer === "false" &&
+                                                  question.correctAnswer !==
+                                                    "false" && (
+                                                    <Badge
+                                                      bg="danger"
+                                                      className="ms-2"
+                                                    >
+                                                      Student's Selection
+                                                    </Badge>
+                                                  )}
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )}
+
+                                    <div className="student-response mb-4">
+                                      <h6 className="response-header">
+                                        <span className="me-2">
+                                          Student's Response
+                                        </span>
+                                        {answer.isCorrect === null ? (
+                                          <Badge>Not grading</Badge>
+                                        ) : answer.isCorrect ? (
+                                          <Badge bg="success">Correct</Badge>
+                                        ) : (
+                                          <Badge bg="danger">Incorrect</Badge>
+                                        )}
+                                      </h6>
+
+                                      {/* Display student answer based on question type */}
+                                      {question?.type === "essay" ? (
+                                        <div className="essay-answer p-3 border rounded">
+                                          {answer.answer ||
+                                            "No response provided"}
+                                        </div>
+                                      ) : question?.type === "true-false" ? (
+                                        <div className="selected-answer p-2">
+                                          <div
+                                            className={`selected-option ${
+                                              answer.isCorrect
+                                                ? "bg-success-subtle"
+                                                : "bg-danger-subtle"
+                                            } p-2 rounded`}
+                                          >
+                                            {answer.answer ||
+                                              "No response provided"}
+                                          </div>
+                                        </div>
+                                      ) : question?.type ===
+                                        "multiple-choice" ? (
+                                        <div className="selected-answer p-2">
+                                          <div
+                                            className={`selected-option ${
+                                              answer.isCorrect
+                                                ? "bg-success-subtle"
+                                                : "bg-danger-subtle"
+                                            } p-2 rounded`}
+                                          >
+                                            {question?.options?.find(
+                                              (o) =>
+                                                o.optionId === answer.answer
+                                            )?.text || "No response provided"}
+                                          </div>
+                                        </div>
+                                      ) : (
+                                        <div className="no-answer text-muted">
+                                          No response provided
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    {/* Simplified essay grading */}
+                                    {question?.type === "essay" && (
+                                      <div className="grading-section mt-3 border-top pt-3">
+                                        <h6>Essay Evaluation</h6>
+                                        <div className="mt-2">
+                                          <Form.Check
+                                            type="radio"
+                                            id={`correct-${answer.questionId}`}
+                                            name={`essay-grade-${answer.questionId}`}
+                                            label="Correct"
+                                            checked={
+                                              answers.find(
+                                                (a) => a.id === answer.id
+                                              )?.isCorrect === true
+                                            }
+                                            onChange={() => {
+                                              setAnswers((prevAnswers) => {
+                                                return prevAnswers.map(
+                                                  (ans) => {
+                                                    if (ans.id === answer.id) {
+                                                      return {
+                                                        ...ans,
+                                                        isCorrect: true,
+                                                      };
+                                                    }
+                                                    return ans;
+                                                  }
+                                                );
+                                              });
+                                            }}
+                                            inline
+                                          />
+                                          <Form.Check
+                                            type="radio"
+                                            id={`incorrect-${answer.questionId}`}
+                                            name={`essay-grade-${answer.questionId}`}
+                                            label="Incorrect"
+                                            checked={
+                                              answers.find(
+                                                (a) => a.id === answer.id
+                                              )?.isCorrect === false
+                                            }
+                                            onChange={() => {
+                                              setAnswers((prevAnswers) => {
+                                                return prevAnswers.map(
+                                                  (ans) => {
+                                                    if (ans.id === answer.id) {
+                                                      return {
+                                                        ...ans,
+                                                        isCorrect: false,
+                                                      };
+                                                    }
+                                                    return ans;
+                                                  }
+                                                );
+                                              });
+                                            }}
+                                            inline
+                                          />
                                         </div>
                                       </div>
-                                    ) : question?.type === "multiple-choice" ? (
-                                      <div className="selected-answer p-2">
-                                        <div className={`selected-option ${answer.isCorrect ? "bg-success-subtle" : "bg-danger-subtle"} p-2 rounded`}>
-                                          {question?.options?.find(o => o.optionId === answer.answer)?.text || "No response provided"}
-                                        </div>
-                                      </div>
-                                    ) : (
-                                      <div className="no-answer text-muted">No response provided</div>
                                     )}
                                   </div>
-                                  
-                                  {/* Manual grading section only for essay questions */}
-                                  {question?.type === "essay" && (
-                                    <div className="grading-section mt-3 border-top pt-3">
-                                      <h6>Manual Grading</h6>
-                                      <div className="d-flex align-items-center mt-2">
-                                        <Form.Control type="number" min="0" max={question.points || 1} placeholder="Points" className="me-2" style={{width: "100px"}} />
-                                        <span>out of {question.points || 1} points</span>
-                                        <Button variant="primary" size="sm" className="ms-auto">Save Grade</Button>
-                                      </div>
-                                      <Form.Group className="mt-2">
-                                        <Form.Control as="textarea" rows={2} placeholder="Feedback (optional)" />
-                                      </Form.Group>
-                                    </div>
-                                  )}
-                                </div>
-                              </Accordion.Body>
-                            </Accordion.Item>
-                          );
-                        })}
+                                </Accordion.Body>
+                              </Accordion.Item>
+                            );
+                          }
+                        )}
                       </Accordion>
                     </Card.Body>
                   </Card>
@@ -365,6 +597,61 @@ const ReviewAttempt: React.FC = () => {
                       </Card.Body>
                     </Card>
                   )} */}
+
+                  <Card className="mb-4">
+                    <Card.Header className="d-flex justify-content-between align-items-center">
+                      <h5 className="mb-0">Feedback & Final Score</h5>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={async () => {
+                          await gradeAttempt(
+                            selectedAttemptId,
+                            feedback,
+                            score,
+                            answers
+                          );
+                          handleAttemptSelect(selectedAttemptId);
+                        }}
+                      >
+                        Save Changes
+                      </Button>
+                    </Card.Header>
+                    <Card.Body>
+                      <Row>
+                        <Col md={8}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Feedback to Student</Form.Label>
+                            <Form.Control
+                              as="textarea"
+                              rows={4}
+                              placeholder="Enter feedback for the student..."
+                              value={feedback}
+                              onChange={(e) => setFeedback(e.target.value)}
+                            />
+                          </Form.Group>
+                        </Col>
+                        <Col md={4}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Final Score (%)</Form.Label>
+                            <div className="d-flex align-items-center">
+                              <Form.Control
+                                type="number"
+                                min="0"
+                                max="100"
+                                className="me-2"
+                                value={score}
+                                onChange={(e) =>
+                                  setScore(Number(e.target.value))
+                                }
+                              />
+                              <span>%</span>
+                            </div>
+                          </Form.Group>
+                        </Col>
+                      </Row>
+                    </Card.Body>
+                  </Card>
                 </>
               )}
             </Col>
