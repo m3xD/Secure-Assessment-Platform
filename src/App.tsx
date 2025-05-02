@@ -24,6 +24,7 @@ import AssessmentTakingLayout from "./layout/AssessmentTakingLayout";
 import RecentAssessmentsList from "./pages/user/RecentAssessmentsList/RecentAssessmentsList";
 import AssessmentResultDetail from "./pages/user/AssessmentResultDetail/AssessmentResultDetail";
 import FaceRegister from "./pages/user/FaceRegister/FaceRegister";
+import ReviewAttempt from "./pages/admin/ReviewAttempt/ReviewAttempt";
 
 // Create a protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -229,6 +230,19 @@ function App() {
                 <AssessmentLayout>
                   <AssessmentDetail />
                 </AssessmentLayout>
+              ) : (
+                <Navigate to="/" />
+              )}
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/assessments/:assessmentId/users/:userId/review"
+          element={
+            <ProtectedRoute>
+              {authState.user?.role === "admin" ? (
+                <ReviewAttempt />
               ) : (
                 <Navigate to="/" />
               )}

@@ -7,7 +7,7 @@ const questionsService = {
    * @param {string} id - Assessment ID
    * @returns {Promise<Question[]>} - Returns list of questions for the assessment
    */
-  async getAssessmentQuestions(id: string) {
+  async getAssessmentQuestions(id: string): Promise<Question[]> {
     try {
       const res = await mainApi.get(`/assessments/${id}/questions`);
       const questions: Question[] = res.data;

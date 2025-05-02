@@ -27,6 +27,7 @@ interface AssessmentState {
     data: AssessmentDetails | null;
     questions: Question[];
     settings: AssessmentSettings | null;
+    studentSubmissions: any[];
     loading: boolean;
     error: string | null;
   };
@@ -35,7 +36,7 @@ interface AssessmentState {
     showDeleteModal: boolean;
     showDuplicateModal: boolean;
     modalMode: "create" | "edit";
-    selectedAssessment: Assessment & { id: string } | null;
+    selectedAssessment: (Assessment & { id: string }) | null;
     assessmentToDelete: string | null;
     assessmentToDuplicate: any | null;
     isEditingSettings: boolean;
@@ -50,6 +51,7 @@ type AssessmentAction =
   | { type: "SET_ASSESSMENTS_LIST"; payload: any }
   | { type: "SET_FILTER"; payload: { name: string; value: any } }
   | { type: "SET_CURRENT_ASSESSMENT"; payload: AssessmentDetails }
+  | { type: "SET_STUDENT_SUBMISSIONS"; payload: any[] }
   | { type: "SET_QUESTIONS"; payload: Question[] }
   | { type: "ADD_QUESTION"; payload: Question }
   | { type: "UPDATE_QUESTION"; payload: Question }
@@ -94,6 +96,7 @@ const initialState: AssessmentState = {
     data: null,
     questions: [],
     settings: null,
+    studentSubmissions: [],
     loading: false,
     error: null,
   },
@@ -153,6 +156,14 @@ const assessmentReducer = (
           questions: action.payload.questions,
           settings: action.payload.settings,
           loading: false,
+        },
+      };
+    case "SET_STUDENT_SUBMISSIONS":
+      return {
+        ...state,
+        currentAssessment: {
+          ...state.currentAssessment,
+          studentSubmissions: action.payload,
         },
       };
     case "SET_QUESTIONS":
@@ -318,7 +329,7 @@ const assessmentReducer = (
         ...state,
         assessmentList: {
           ...state.assessmentList,
-          content: [...state.assessmentList.content, action.payload],
+          content: [action.payload, ...state.assessmentList.content],
           totalElements: state.assessmentList.totalElements + 1,
         },
       };

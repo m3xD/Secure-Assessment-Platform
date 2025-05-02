@@ -27,6 +27,26 @@ export const useAssessmentDetail = (assessmentId: string | undefined) => {
     }
   }, [assessmentId, dispatch]);
 
+  const fetchStudentSubmissions = useCallback(async () => {
+    if (!assessmentId) return;
+    try {
+      const studentSubmissions = await assessmentsService.getStudentSubmissions(
+        assessmentId
+      );
+      dispatch({
+        type: "SET_STUDENT_SUBMISSIONS",
+        payload: studentSubmissions,
+      });
+      console.log(">>> check student submissions:", studentSubmissions);
+    } catch (error) {
+      console.error("Error fetching student submissions:", error);
+      dispatch({
+        type: "SET_ERROR",
+        payload: "Failed to load student submissions. Please try again.",
+      });
+    }
+  }, [assessmentId, dispatch]);
+
   const updateSettings = useCallback(
     async (settings: AssessmentSettings) => {
       if (!assessmentId) return false;
@@ -65,7 +85,7 @@ export const useAssessmentDetail = (assessmentId: string | undefined) => {
       if (currentAssessment.data) {
         dispatch({
           type: "SET_CURRENT_ASSESSMENT",
-          payload: { ...currentAssessment.data, status: "Active" },
+          payload: { ...currentAssessment.data, status: "active" },
         });
       }
       toast.success("Assessment published successfully!");
@@ -79,12 +99,14 @@ export const useAssessmentDetail = (assessmentId: string | undefined) => {
 
   useEffect(() => {
     fetchAssessmentDetails();
-  }, [fetchAssessmentDetails]);
+    fetchStudentSubmissions();
+  }, [fetchAssessmentDetails, fetchStudentSubmissions]);
 
   return {
     assessment: currentAssessment.data,
     questions: currentAssessment.questions,
     settings: currentAssessment.settings,
+    studentSubmissions: currentAssessment.studentSubmissions,
     loading: currentAssessment.loading,
     error: currentAssessment.error,
     isEditingSettings,

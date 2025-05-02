@@ -214,6 +214,22 @@ const assessmentsService = {
       throw new Error("Failed to get assessment result");
     }
   },
+
+  /**
+   * Get student submissions for an assessment
+   * @param {string} id - Assessment ID
+   * @returns {Promise<any>} - Returns student submissions
+   */
+  async getStudentSubmissions(id: string): Promise<any> {
+    try {
+      const res = await mainApi.get(`/admin/assessments/${id}`);
+      return res.data.users.content;
+    } catch (error) {
+      throw new Error("Failed to get student submissions");
+    }
+  }
 };
+
+
 
 export default assessmentsService;
