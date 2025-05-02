@@ -133,5 +133,28 @@ const adminService = {
       throw new Error("Failed to update attempt");
     }
   },
+
+  /**
+   * List all suspicious action of a specific user in a specific assessment
+   * @param {string} userId - User ID
+   * @param {string} assessmentId - Assessment ID
+   * @return {Promise<any>} - List of suspicious actions
+   */
+  async getSuspiciousActOfUserInAssessment(
+    userId: string,
+    assessmentId: string
+  ): Promise<any> {
+    try {
+      const res = await mainApi.get(
+        `/admin/activity/${userId}/${assessmentId}`
+      );
+      // console.log(">>check res getSuspiciousActOfUserInAssessment: ", res.data);
+      return res.data;
+    } catch (error) {
+      throw new Error(
+        "Failed to fetch suspicious actions of user in assessment"
+      );
+    }
+  },
 };
 export default adminService;

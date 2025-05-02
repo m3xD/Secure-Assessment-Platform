@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer } from "react";
+import { Suspense, useCallback, useEffect, useReducer } from "react";
 import {
   Answer,
   StudentAttemptHistory,
@@ -13,6 +13,7 @@ interface ReviewAttemptState {
   attemptList: StudentAttemptHistory[];
   attemptDetails: StudentAttemptHistoryDetails;
   questionsList: Question[];
+  suspiciousList: any[];
   loading: boolean;
   error: string | null;
 }
@@ -21,6 +22,7 @@ type ReviewAttemptStateAction =
   | { type: "SET_ATTEMPT_LIST"; payload: StudentAttemptHistory[] }
   | { type: "SET_ATTEMPT_DETAILS"; payload: StudentAttemptHistoryDetails }
   | { type: "SET_QUESTION_LIST"; payload: Question[] }
+  | { type: "SET_SUSPICIOUS_LIST"; payload: any[] }
   | { type: "SET_LOADING"; payload: boolean }
   | { type: "SET_ERROR"; payload: string | null };
 
@@ -28,6 +30,7 @@ const initialState: ReviewAttemptState = {
   attemptList: [],
   attemptDetails: {} as StudentAttemptHistoryDetails,
   questionsList: [],
+  suspiciousList: [],
   loading: false,
   error: null,
 };
@@ -54,6 +57,11 @@ const reviewAttemptReducer = (
       return {
         ...state,
         questionsList: action.payload,
+      };
+    case "SET_SUSPICIOUS_LIST":
+      return {
+        ...state,
+        suspiciousList: action.payload,
       };
     case "SET_LOADING":
       return {
@@ -119,6 +127,19 @@ export const useReviewAttempt = (assessmentId: string, userId: string) => {
     dispatch({ type: "SET_QUESTION_LIST", payload: questionsList });
   }, []);
 
+  const fetchSuspiciousList = useCallback(async () => {
+    if (!assessmentId || !userId) return;
+
+    dispatch({ type: "SET_LOADING", payload: true });
+    const res =
+      await adminService.getSuspiciousActOfUserInAssessment(
+        userId,
+        assessmentId
+      );
+    const suspiciousList = res.content;
+    dispatch({ type: "SET_SUSPICIOUS_LIST", payload: suspiciousList });
+  }, []);
+
   const gradeAttempt = useCallback(
     async (
       attemptId: string,
@@ -146,14 +167,27 @@ export const useReviewAttempt = (assessmentId: string, userId: string) => {
   );
 
   useEffect(() => {
-    fetchAttemptList();
-    fetchQuestionList();
-  }, []);
+    const fetchAllData = async () => {
+      try {
+        // Run these in parallel since they don't depend on each other
+        await Promise.all([
+          fetchAttemptList(),
+          fetchQuestionList(),
+          fetchSuspiciousList(),
+        ]);
+      } catch (error) {
+        console.error("Error loading review data:", error);
+      }
+    };
+
+    fetchAllData();
+  }, [fetchAttemptList, fetchQuestionList, fetchSuspiciousList]);
 
   return {
     studentAttemptHistory: state.attemptList,
     studentAttempHistoryDetail: state.attemptDetails,
     questionsList: state.questionsList,
+    suspiciousList: state.suspiciousList,
     loading: state.loading,
     error: state.error,
     fetchAttemptDetails,

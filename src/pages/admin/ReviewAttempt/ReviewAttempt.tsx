@@ -45,6 +45,7 @@ const ReviewAttempt: React.FC = () => {
     studentAttemptHistory,
     studentAttempHistoryDetail,
     questionsList,
+    suspiciousList,
     loading,
     fetchAttemptDetails,
     gradeAttempt,
@@ -573,7 +574,7 @@ const ReviewAttempt: React.FC = () => {
                     </Card.Body>
                   </Card>
 
-                  {/* {studentAttempHistoryDetail.suspiciousActivities?.length > 0 && (
+                  {suspiciousList?.length > 0 && (
                     <Card className="mb-4">
                       <Card.Header className="bg-warning text-dark">
                         <h5 className="mb-0">
@@ -583,20 +584,20 @@ const ReviewAttempt: React.FC = () => {
                       </Card.Header>
                       <Card.Body>
                         <ul className="suspicious-activities-list">
-                          {studentAttempHistoryDetail.suspiciousActivities.map((activity, index) => (
-                            <li key={index} className="activity-item">
+                          {suspiciousList.map((activity) => (
+                            <li key={activity.id} className="activity-item">
                               <div className="activity-time">
                                 {formatDate(activity.timestamp)}
                               </div>
                               <div className="activity-detail">
-                                <strong>{activity.eventType}:</strong> {activity.details}
+                                <strong>{activity.type}:</strong> {activity.details}
                               </div>
                             </li>
                           ))}
                         </ul>
                       </Card.Body>
                     </Card>
-                  )} */}
+                  )}
 
                   <Card className="mb-4">
                     <Card.Header className="d-flex justify-content-between align-items-center">
