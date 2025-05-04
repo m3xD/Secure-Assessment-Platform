@@ -44,7 +44,7 @@ const FaceRegister: React.FC = () => {
               )}
               
               <div className="text-center mb-3">
-                <p>Please position your face within the frame and capture 5 clear images for facial recognition.</p>
+                <p>Please position your face within the frame and capture 3 clear images for facial recognition.</p>
               </div>
               
               <div className="webcam-container mb-4">
@@ -69,15 +69,15 @@ const FaceRegister: React.FC = () => {
               
               <div className="mb-3">
                 <div className="d-flex justify-content-between mb-2">
-                  <span>Progress: {capturedImages.length}/5 images</span>
+                  <span>Progress: {capturedImages.length}/3 images</span>
                   <span>{progressMessage}</span>
                 </div>
-                <ProgressBar now={capturedImages.length * 20} />
+                <ProgressBar now={capturedImages.length * 33.333} />
               </div>
               
               <div className="captured-images mb-4">
                 <Row className='d-flex justify-content-center'>
-                  {[0, 1, 2, 3, 4].map(index => (
+                  {[0, 1, 2].map(index => (
                     <Col key={index} xs={4} md={2} className="mb-2">
                       <div className="image-placeholder">
                         {capturedImages[index] ? (
@@ -107,7 +107,7 @@ const FaceRegister: React.FC = () => {
                 ) : (
                   <Button 
                     variant="primary" 
-                    onClick={capturedImages.length < 5 ? captureImage : submitRegistration}
+                    onClick={capturedImages.length < 3 ? captureImage : submitRegistration}
                     disabled={isCapturing || isRegistering || !videoRef.current}
                   >
                     {isRegistering ? (
@@ -115,9 +115,9 @@ const FaceRegister: React.FC = () => {
                         <span className="spinner-border spinner-border-sm me-2" />
                         Registering...
                       </>
-                    ) : capturedImages.length < 5 ? (
+                    ) : capturedImages.length < 3 ? (
                       <>
-                        <Camera size={16} className="me-2" /> Capture Image ({capturedImages.length + 1}/5)
+                        <Camera size={16} className="me-2" /> Capture Image ({capturedImages.length + 1}/3)
                       </>
                     ) : (
                       'Complete Registration'
