@@ -58,7 +58,7 @@ export const useSuspiciousActivityTracking = ({
         console.log("assessmentId type:", typeof assessmentId, "value:", assessmentId);
         // log to server
         await analyticsService.logSuspiciousActivity({
-          attemptId: String(assessmentId || ""),
+          attemptId: String(attemptId || ""),
           assessmentId: String(assessmentId || ""),
           type: type,
           details: activityDetails,
