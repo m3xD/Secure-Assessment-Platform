@@ -35,6 +35,7 @@ export const useTakingAssessment = (attemptId: string | undefined) => {
 
   // Using hook tracking suspicious activity
   const { trackTabSwitching } = useSuspiciousActivityTracking({
+    attemptId: assessment?.attemptId,
     assessmentId: assessment?.assessmentId,
     onExceedThreshold: () => {
       handleSubmitAssessment();

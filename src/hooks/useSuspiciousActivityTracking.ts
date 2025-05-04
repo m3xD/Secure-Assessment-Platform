@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import analyticsService from "../services/analyticsService";
 
 interface UseSuspiciousActivityTrackingProps {
+  attemptId: string | undefined;
   assessmentId: string | undefined;
   onExceedThreshold?: () => void;
   thresholds?: {
@@ -13,6 +14,7 @@ interface UseSuspiciousActivityTrackingProps {
 }
 
 export const useSuspiciousActivityTracking = ({
+  attemptId,
   assessmentId,
   onExceedThreshold,
   thresholds = {
@@ -56,7 +58,7 @@ export const useSuspiciousActivityTracking = ({
         console.log("assessmentId type:", typeof assessmentId, "value:", assessmentId);
         // log to server
         await analyticsService.logSuspiciousActivity({
-          // userId: authState.user?.id || "",
+          attemptId: String(assessmentId || ""),
           assessmentId: String(assessmentId || ""),
           type: type,
           details: activityDetails,
@@ -81,7 +83,7 @@ export const useSuspiciousActivityTracking = ({
         console.error(`Error tracking ${type}:`, error);
       }
     },
-    [assessmentId, authState.user?.id, onExceedThreshold, thresholds]
+    [attemptId, assessmentId, authState.user?.id, onExceedThreshold, thresholds]
   );
 
   //   reset counter for the specific actiivity type

@@ -48,12 +48,14 @@ const ReviewAttempt: React.FC = () => {
     suspiciousList,
     loading,
     fetchAttemptDetails,
+    fetchSuspiciousList,
     gradeAttempt,
   } = useReviewAttempt(assessmentId, userId);
 
-  const handleAttemptSelect = (attemptId: string) => {
+  const handleAttemptSelect = async (attemptId: string) => {
     setSelectedAttemptId(attemptId);
-    fetchAttemptDetails(attemptId);
+    await fetchAttemptDetails(attemptId);
+    await fetchSuspiciousList(attemptId);
   };
 
   const [feedback, setFeedback] = useState<string>("");
@@ -574,30 +576,54 @@ const ReviewAttempt: React.FC = () => {
                     </Card.Body>
                   </Card>
 
-                  {suspiciousList?.length > 0 && (
-                    <Card className="mb-4">
-                      <Card.Header className="bg-warning text-dark">
-                        <h5 className="mb-0">
-                          <Flag size={16} className="me-2" />
-                          Suspicious Activities
-                        </h5>
-                      </Card.Header>
-                      <Card.Body>
-                        <ul className="suspicious-activities-list">
+                  <Card className="mb-4">
+                    <Card.Header className="bg-warning text-dark">
+                      <h5 className="mb-0">
+                        <Flag size={16} className="me-2" />
+                        Suspicious Activities
+                      </h5>
+                    </Card.Header>
+                    <Card.Body>
+                      {suspiciousList.length > 0 ? (
+                        <ul className="suspicious-activities-list p-0">
                           {suspiciousList.map((activity) => (
-                            <li key={activity.id} className="activity-item">
-                              <div className="activity-time">
-                                {formatDate(activity.timestamp)}
+                            <li
+                              key={activity.id}
+                              className="activity-item border-bottom py-3 list-unstyled"
+                            >
+                              <div className="d-flex justify-content-between align-items-center mb-2">
+                                <div className="activity-type">
+                                  <strong>{activity.type}</strong>
+                                </div>
+                                <div className="d-flex align-items-center">
+                                  <Badge
+                                    bg={
+                                      activity.severity === "HIGH"
+                                        ? "danger"
+                                        : activity.severity === "MEDIUM"
+                                        ? "warning"
+                                        : "info"
+                                    }
+                                    className="me-2"
+                                  >
+                                    {activity.severity}
+                                  </Badge>
+                                  <small className="text-muted">
+                                    {formatDate(activity.timestamp)}
+                                  </small>
+                                </div>
                               </div>
-                              <div className="activity-detail">
-                                <strong>{activity.type}:</strong> {activity.details}
+                              <div className="activity-detail text-secondary">
+                                {activity.details}
                               </div>
                             </li>
                           ))}
                         </ul>
-                      </Card.Body>
-                    </Card>
-                  )}
+                      ) : (
+                        <div>Thanh niên này trong sạch!</div>
+                      )}
+                    </Card.Body>
+                  </Card>
 
                   <Card className="mb-4">
                     <Card.Header className="d-flex justify-content-between align-items-center">

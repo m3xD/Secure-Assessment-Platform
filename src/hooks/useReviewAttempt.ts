@@ -8,12 +8,13 @@ import adminService from "../services/adminService";
 import { Question } from "../types/QuestionTypes";
 import questionsService from "../services/questionsService";
 import { toast } from "react-toastify";
+import { LogSuspiciousActivity } from "../types/AnalyticTypes";
 
 interface ReviewAttemptState {
   attemptList: StudentAttemptHistory[];
   attemptDetails: StudentAttemptHistoryDetails;
   questionsList: Question[];
-  suspiciousList: any[];
+  suspiciousList: LogSuspiciousActivity[];
   loading: boolean;
   error: string | null;
 }
@@ -22,7 +23,7 @@ type ReviewAttemptStateAction =
   | { type: "SET_ATTEMPT_LIST"; payload: StudentAttemptHistory[] }
   | { type: "SET_ATTEMPT_DETAILS"; payload: StudentAttemptHistoryDetails }
   | { type: "SET_QUESTION_LIST"; payload: Question[] }
-  | { type: "SET_SUSPICIOUS_LIST"; payload: any[] }
+  | { type: "SET_SUSPICIOUS_LIST"; payload: LogSuspiciousActivity[] }
   | { type: "SET_LOADING"; payload: boolean }
   | { type: "SET_ERROR"; payload: string | null };
 
@@ -62,6 +63,7 @@ const reviewAttemptReducer = (
       return {
         ...state,
         suspiciousList: action.payload,
+        loading: false,
       };
     case "SET_LOADING":
       return {
@@ -127,16 +129,14 @@ export const useReviewAttempt = (assessmentId: string, userId: string) => {
     dispatch({ type: "SET_QUESTION_LIST", payload: questionsList });
   }, []);
 
-  const fetchSuspiciousList = useCallback(async () => {
-    if (!assessmentId || !userId) return;
+  const fetchSuspiciousList = useCallback(async (attemptId: string) => {
+    if (!attemptId || !userId) return;
 
     dispatch({ type: "SET_LOADING", payload: true });
-    const res =
-      await adminService.getSuspiciousActOfUserInAssessment(
-        userId,
-        assessmentId
-      );
-    const suspiciousList = res.content;
+    const suspiciousList: LogSuspiciousActivity[] = await adminService.getSuspiciousActOfUserInAttempt(
+      userId,
+      attemptId
+    );
     dispatch({ type: "SET_SUSPICIOUS_LIST", payload: suspiciousList });
   }, []);
 
@@ -170,18 +170,14 @@ export const useReviewAttempt = (assessmentId: string, userId: string) => {
     const fetchAllData = async () => {
       try {
         // Run these in parallel since they don't depend on each other
-        await Promise.all([
-          fetchAttemptList(),
-          fetchQuestionList(),
-          fetchSuspiciousList(),
-        ]);
+        await Promise.all([fetchAttemptList(), fetchQuestionList()]);
       } catch (error) {
         console.error("Error loading review data:", error);
       }
     };
 
     fetchAllData();
-  }, [fetchAttemptList, fetchQuestionList, fetchSuspiciousList]);
+  }, [fetchAttemptList, fetchQuestionList]);
 
   return {
     studentAttemptHistory: state.attemptList,
@@ -191,6 +187,7 @@ export const useReviewAttempt = (assessmentId: string, userId: string) => {
     loading: state.loading,
     error: state.error,
     fetchAttemptDetails,
+    fetchSuspiciousList,
     gradeAttempt,
   };
 };

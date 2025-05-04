@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Container,
@@ -216,6 +216,13 @@ const AssessmentDetail = () => {
       minute: "2-digit",
     });
   };
+
+  // Add this after your other state declarations
+  useEffect(() => {
+    if (settings) {
+      setSettingsForm(settings);
+    }
+  }, [settings]);
 
   if (loading) {
     return (

@@ -66,7 +66,7 @@ export type SuspiciousActivityType =
   | "VOICE_DETECTED";
 
 export interface SuspiciousActivity {
-  // userId: string;
+  attemptId: string;
   assessmentId: string;
   type: SuspiciousActivityType;
   details: string;
@@ -78,9 +78,11 @@ export interface LogSuspiciousActivity {
   id: string;
   userId: string;
   assessmentId: string;
+  attemptId: string;
   type: SuspiciousActivityType;
   details: string;
   timestamp: string;
   severity: "LOW" | "MEDIUM" | "HIGH";
   reviewed: boolean; 
+  createdAt: string;
 }

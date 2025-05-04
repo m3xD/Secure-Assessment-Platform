@@ -8,6 +8,7 @@ import {
 } from "./../types/AdminServiceTypes";
 
 import { mainApi } from "../utils/AxiosInterceptor";
+import { LogSuspiciousActivity } from "../types/AnalyticTypes";
 
 const adminService = {
   /**
@@ -137,19 +138,19 @@ const adminService = {
   /**
    * List all suspicious action of a specific user in a specific assessment
    * @param {string} userId - User ID
-   * @param {string} assessmentId - Assessment ID
-   * @return {Promise<any>} - List of suspicious actions
+   * @param {string} attemptId - Attempt ID
+   * @return {Promise<LogSuspiciousActivity[]>} - List of suspicious actions
    */
-  async getSuspiciousActOfUserInAssessment(
+  async getSuspiciousActOfUserInAttempt(
     userId: string,
-    assessmentId: string
-  ): Promise<any> {
+    attemptId: string
+  ): Promise<LogSuspiciousActivity[]> {
     try {
       const res = await mainApi.get(
-        `/admin/activity/${userId}/${assessmentId}`
+        `/admin/activity/${userId}/${attemptId}`
       );
-      // console.log(">>check res getSuspiciousActOfUserInAssessment: ", res.data);
-      return res.data;
+      const suspiciousActions: LogSuspiciousActivity[] = res.data.content;
+      return suspiciousActions;
     } catch (error) {
       throw new Error(
         "Failed to fetch suspicious actions of user in assessment"
