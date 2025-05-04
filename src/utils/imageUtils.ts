@@ -56,6 +56,76 @@ export const captureImageFromVideo = (
 };
 
 /**
+ * Capture image from video element as a Blob
+ * @param videoElement - The video element
+ * @param mimeType - The mime type of the image (default: 'image/jpeg')
+ * @param quality - The quality of the image (0 to 1, default: 0.8)
+ * @param maxWidth - Maximum width to resize to
+ * @param maxHeight - Maximum height to resize to
+ * @returns Promise with the image as a Blob
+ */
+export const captureImageAsBlob = (
+  videoElement: HTMLVideoElement,
+  mimeType: string = 'image/jpeg',
+  quality: number = 0.8,
+  maxWidth?: number,
+  maxHeight?: number
+): Promise<Blob> => {
+  return new Promise((resolve, reject) => {
+    try {
+      const canvas = document.createElement('canvas');
+      
+      // Set initial dimensions from the video
+      let width = videoElement.videoWidth;
+      let height = videoElement.videoHeight;
+      
+      // Resize if needed
+      if (maxWidth && maxHeight) {
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+      }
+      
+      // Set canvas dimensions
+      canvas.width = width;
+      canvas.height = height;
+      
+      // Draw the video frame to the canvas
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Could not get canvas context'));
+        return;
+      }
+      
+      ctx.drawImage(videoElement, 0, 0, width, height);
+      
+      // Convert canvas to Blob
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(new Error('Failed to create blob from canvas'));
+          }
+        },
+        mimeType,
+        quality
+      );
+    } catch (err) {
+      reject(err);
+    }
+  });
+};
+
+/**
  * Convert base64 to Blob
  * @param base64 - The base64 string
  * @returns Blob object

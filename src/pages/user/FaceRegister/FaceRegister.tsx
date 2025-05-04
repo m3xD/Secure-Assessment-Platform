@@ -81,7 +81,7 @@ const FaceRegister: React.FC = () => {
                     <Col key={index} xs={4} md={2} className="mb-2">
                       <div className="image-placeholder">
                         {capturedImages[index] ? (
-                          <img src={capturedImages[index]} alt={`Capture ${index + 1}`} />
+                          <img src={URL.createObjectURL(capturedImages[index])} alt={`Capture ${index + 1}`} />
                         ) : (
                           <span>{index + 1}</span>
                         )}

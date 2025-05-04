@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
-import { captureImageFromVideo, resizeBase64Image } from '../utils/imageUtils';
+import { captureImageAsBlob } from '../utils/imageUtils';
 import { useAuth } from './useAuth';
-import { mainApi } from '../utils/AxiosInterceptor';
 import axios from 'axios';
 
 export const useFaceRegistration = () => {
@@ -10,7 +9,8 @@ export const useFaceRegistration = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   
-  const [capturedImages, setCapturedImages] = useState<string[]>([]);
+  // Change the state type to store Blobs instead of base64 strings
+  const [capturedImages, setCapturedImages] = useState<Blob[]>([]);
   const [isCapturing, setIsCapturing] = useState<boolean>(false);
   const [progressMessage, setProgressMessage] = useState<string>('Position your face and start capturing');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -103,14 +103,11 @@ export const useFaceRegistration = () => {
       // Add a slight delay for the flash effect
       await new Promise(resolve => setTimeout(resolve, 300));
       
-      // Capture image from video
-      const base64Image = captureImageFromVideo(videoRef.current);
-      
-      // Resize the image to reduce size before sending to API
-      const resizedImage = await resizeBase64Image(base64Image, 640, 480);
+      // Capture image from video as a Blob directly
+      const imageBlob = await captureImageAsBlob(videoRef.current, 'image/jpeg', 0.8, 640, 480);
       
       // Add to captured images
-      setCapturedImages(prev => [...prev, resizedImage]);
+      setCapturedImages(prev => [...prev, imageBlob]);
       
       // Update progress message
       const newCount = capturedImages.length + 1;
@@ -145,16 +142,29 @@ export const useFaceRegistration = () => {
     setProgressMessage('Registering your face...');
     
     try {
-      // Prepare data for API
-      const registrationData = {
-        name: authState.user.name,
-        images: capturedImages,
-      };
-
-      console.log('Registration data for face register:', registrationData);
+      // Create FormData object
+      const formData = new FormData();
       
-      // Send to API
-      const response = await axios.post('http://139.59.126.157:8081/register', registrationData);
+      // Add name to form data
+      formData.append('name', authState.user.name);
+      
+      // Append images directly to formData (they're already Blobs)
+      for (let i = 0; i < capturedImages.length; i++) {
+        formData.append('images', capturedImages[i], `face_${i+1}.jpg`);
+      }
+
+      console.log('Submitting face registration with FormData');
+      
+      // Send to API with content-type multipart/form-data
+      const response = await axios.post(
+        'https://api-sap.m3xd.dev/ai/register', 
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          }
+        }
+      );
       
       if (response.status === 200) {
         console.log('Face registration successful:', response);
@@ -173,7 +183,7 @@ export const useFaceRegistration = () => {
     } finally {
       setIsRegistering(false);
     }
-  }, [capturedImages, authState.user?.name]);
+  }, [capturedImages, authState.user?.name, resetCapture]);
   
   return {
     videoRef,
