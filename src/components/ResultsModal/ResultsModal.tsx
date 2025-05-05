@@ -1,11 +1,16 @@
 import React from "react";
-import { Button, Col, Modal, Row, Badge } from "react-bootstrap";
-import { ChevronRight, Check, X } from "react-feather";
-import { useAssessmentTakingContext } from "../../contexts/AssessmentTakingContext";
+import { Badge, Button, Col, Modal, Row } from "react-bootstrap";
+import { Check, ChevronRight, X } from "react-feather";
 import { useNavigate } from "react-router-dom";
+import { useAssessmentTakingContext } from "../../contexts/AssessmentTakingContext";
 import "./ResultsModal.scss";
 
-const ResultsModal: React.FC = () => {
+// Define props including the onClose handler
+interface ResultsModalProps {
+    onClose: () => void; // Function to close modal and navigate to dashboard
+}
+
+const ResultsModal: React.FC<ResultsModalProps> = ({ onClose }) => { // Destructure onClose prop
   const navigate = useNavigate();
   const { state, dispatch } = useAssessmentTakingContext();
 
@@ -13,17 +18,28 @@ const ResultsModal: React.FC = () => {
   const isPassed =
     state.submittedResult?.results.status?.toLowerCase() === "passed";
 
+  // Handler specifically for viewing detailed results - KEEP AS IS
+  const handleViewDetails = () => {
+    if (state.submittedResult?.assessmentId) {
+        dispatch({ type: "CLOSE_RESULT_MODAL" }); // Close modal first
+        navigate(`/user/results/${state.submittedResult.assessmentId}`); // Navigate to details page
+    } else {
+        console.error("Cannot navigate to details, assessmentId missing in submittedResult");
+        onClose(); // Fallback to default close action if ID is missing
+    }
+  };
+
   return (
     <Modal
       show={state.ui.showResultModal}
-      onHide={() => dispatch({ type: "CLOSE_RESULT_MODAL" })}
+      onHide={onClose} // Use the passed onClose handler for backdrop/header close
       backdrop="static"
       keyboard={false}
       centered
       size="lg"
       className="assessment-results-modal"
     >
-      <Modal.Header closeButton>
+      <Modal.Header closeButton> {/* closeButton will now trigger onClose via onHide */}
         <Modal.Title>Assessment Results</Modal.Title>
       </Modal.Header>
       <Modal.Body>
@@ -129,19 +145,14 @@ const ResultsModal: React.FC = () => {
       <Modal.Footer>
         <Button
           variant="outline-secondary"
-          onClick={() => {
-            dispatch({ type: "CLOSE_RESULT_MODAL" });
-            navigate(`/user/dashboard`);
-          }}
+          onClick={onClose}
         >
           Return to Dashboard
         </Button>
         <Button
           variant="primary"
-          onClick={() => {
-            dispatch({ type: "CLOSE_RESULT_MODAL" });
-            navigate(`/user/results/${state.submittedResult?.assessmentId}`);
-          }}
+          onClick={handleViewDetails} // Use the dedicated handler
+          disabled={!state.submittedResult?.assessmentId} // Disable if no ID
         >
           View Detailed Analysis <ChevronRight size={16} className="ms-1" />
         </Button>

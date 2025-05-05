@@ -1,18 +1,18 @@
-import { useEffect, useCallback, useRef, useState } from "react";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useAssessmentTakingContext } from "../contexts/AssessmentTakingContext";
 import studentService from "../services/studentService";
 import {
-  StartAssessmentQuestions,
-  StartAssessment,
-  SubmitAssessmentResponse,
+	StartAssessment,
+	StartAssessmentQuestions,
+	SubmitAssessmentResponse,
 } from "../types/StudentServiceTypes";
-import { useAssessmentTakingContext } from "../contexts/AssessmentTakingContext";
-import analyticsService from "../services/analyticsService";
 import { useAuth } from "./useAuth";
 import { useSuspiciousActivityTracking } from "./useSuspiciousActivityTracking";
 
-export const useTakingAssessment = (attemptId: string | undefined) => {
+export const useTakingAssessment = (urlAttemptId: string | undefined) => {
   const navigate = useNavigate();
   const { authState } = useAuth();
   const { state, dispatch } = useAssessmentTakingContext();
@@ -26,11 +26,13 @@ export const useTakingAssessment = (attemptId: string | undefined) => {
     loading,
     error,
     assessment,
+    attemptId,
     currentQuestionIndex,
     answers,
     remainingTime,
     isSubmitting,
     webcamWarnings,
+    submittedResult, // <-- Destructure submittedResult
   } = state;
 
   // Using hook tracking suspicious activity
@@ -45,12 +47,13 @@ export const useTakingAssessment = (attemptId: string | undefined) => {
   // Load assessment data
   useEffect(() => {
     const loadAssessmentData = async () => {
-      if (!attemptId) return;
+      const attemptIdToLoad = urlAttemptId;
+      if (!attemptIdToLoad) return;
 
       // Check if we're already loading or if we already have the data
       if (
         loadingAttempt ||
-        (assessment && assessment.attemptId === attemptId)
+        (assessment && assessment.attemptId === attemptIdToLoad)
       ) {
         return;
       }
@@ -62,7 +65,7 @@ export const useTakingAssessment = (attemptId: string | undefined) => {
 
         // First, get the assessment data from session storage (basic info)
         const savedAssessmentData = sessionStorage.getItem(
-          `assessment_${attemptId}`
+          `assessment_${attemptIdToLoad}`
         );
         console.log("Saved assessment data:", savedAssessmentData);
 
@@ -73,7 +76,7 @@ export const useTakingAssessment = (attemptId: string | undefined) => {
 
           // Now fetch the latest attempt details from the API to get current state and answers
           const attemptDetails = await studentService.getAttemptDetails(
-            attemptId
+            attemptIdToLoad
           );
 
           console.log("Loaded assessment data and latest answers");
@@ -98,9 +101,10 @@ export const useTakingAssessment = (attemptId: string | undefined) => {
           dispatch({
             type: "LOAD_ASSESSMENT_SUCCESS",
             payload: {
-              assessment: assessmentData, // Use the original assessment data, not a merged version
+              assessment: assessmentData,
               initialAnswers,
               timeRemaining,
+              attemptId: attemptIdToLoad,
             },
           });
         } else {
@@ -132,7 +136,7 @@ export const useTakingAssessment = (attemptId: string | undefined) => {
         clearTimeout(answerSaveTimerRef.current);
       }
     };
-  }, [attemptId, dispatch, navigate]); // Removed assessment from dependencies
+  }, [urlAttemptId, dispatch, navigate]);
 
   // Auto-save answers effect
   useEffect(() => {
@@ -255,7 +259,7 @@ export const useTakingAssessment = (attemptId: string | undefined) => {
   }, [dispatch]);
 
   const handleWebcamEvent = useCallback(
-    (eventType: string, details: any) => {
+    (eventType: string, details: unknown) => {
       // if (eventType === "warning") {
       //   dispatch({ type: "ADD_WEBCAM_WARNING" });
       //   toast.warning(details.message);
@@ -306,6 +310,11 @@ export const useTakingAssessment = (attemptId: string | undefined) => {
     }
   }, [assessment, attemptId, navigate, dispatch, pendingAnswers]);
 
+  // --- Function to handle closing the results modal AND navigating to dashboard ---
+  const handleCloseResultsModal = useCallback(() => {
+    navigate('/user/dashboard'); // Navigate to dashboard - this will unmount TakingAssessment
+  }, [navigate]); // Dependency only on navigate
+
   // Other utility functions remain the same
   const calculateProgress = useCallback(() => {
     if (!assessment) return 0;
@@ -327,14 +336,21 @@ export const useTakingAssessment = (attemptId: string | undefined) => {
     return answers.find((a) => a.questionId === question.id)?.answer || "";
   }, [assessment, currentQuestionIndex, answers]);
 
+  // Callback to increment warning count
+  const handleViolationDetected = useCallback(() => {
+    dispatch({ type: "ADD_WEBCAM_WARNING" });
+  }, [dispatch]);
+
   return {
     loading,
     error,
     assessment,
+    attemptId,
     currentQuestionIndex,
     answers,
     isSubmitting,
     webcamWarnings,
+    submittedResult, // <-- Add submittedResult here
 
     getCurrentQuestion,
     getCurrentAnswer,
@@ -342,8 +358,9 @@ export const useTakingAssessment = (attemptId: string | undefined) => {
     handleAnswerChange,
     handleNextQuestion,
     handlePrevQuestion,
-    handleWebcamEvent,
     handleSubmitAssessment,
     calculateProgress,
+    handleViolationDetected,
+    handleCloseResultsModal, // <-- Return the new handler function
   };
 };

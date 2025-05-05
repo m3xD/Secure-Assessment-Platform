@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { authApi } from "./../utils/AxiosInterceptor";
 import axios from "axios";
 import { User } from "../types/UserTypes";
