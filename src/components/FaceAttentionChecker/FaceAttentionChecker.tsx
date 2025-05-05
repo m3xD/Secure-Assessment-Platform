@@ -180,7 +180,10 @@ const FaceAttentionChecker: React.FC<FaceAttentionCheckerProps> = ({ attemptId, 
 			const landmarks = results.multiFaceLandmarks[0] as NormalizedLandmarkList;
 			immediateViolation = checkAttentionAndGaze(landmarks, defaultDetectionConfig);
 		} else if (!immediateViolation && faceCount === 0) {
-			setStatus('No face detected'); // Update status if no face is present.
+			// Treat 'no face' as an immediate violation
+			immediateViolation = 'no_face';
+			// Status will be updated below in the 'if (immediateViolation)' block
+			// setStatus('No face detected'); // Remove this line or keep for immediate feedback if preferred
 		}
 
 		// --- Manage Violation State & Timers ---
@@ -188,7 +191,11 @@ const FaceAttentionChecker: React.FC<FaceAttentionCheckerProps> = ({ attemptId, 
 
 		if (immediateViolation) {
 			// A potential violation is currently detected.
-			setStatus(prev => prev.startsWith(`Potential Violation: ${immediateViolation}`) ? prev : `Potential Violation: ${immediateViolation}`);
+			// Update status message based on the specific violation
+			setStatus(prev => {
+				const newStatus = `Potential Violation: ${immediateViolation}`;
+				return prev === newStatus ? prev : newStatus; // Avoid redundant updates
+			});
 
 			if (currentViol === immediateViolation) {
 				// Violation persists, check if duration threshold is met.
@@ -208,9 +215,9 @@ const FaceAttentionChecker: React.FC<FaceAttentionCheckerProps> = ({ attemptId, 
 			if (currentViol) {
 				console.log(`Violation (${currentViol}) ended.`); // Log when a tracked violation stops.
 			}
-			// Update status based on face count.
+			// Update status based on face count (should be 1 if no violation)
 			setStatus(prev => {
-				const newStatus = faceCount === 1 ? 'Attention OK' : (faceCount === 0 ? 'No face detected' : `Multiple faces: ${faceCount}`);
+				const newStatus = 'Attention OK'; // Simplified status when no violation
 				return prev === newStatus ? prev : newStatus; // Avoid redundant state updates.
 			});
 			// Reset violation tracking state.
