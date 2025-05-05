@@ -57,17 +57,41 @@ const FaceAttentionChecker: React.FC<FaceAttentionCheckerProps> = ({ attemptId, 
 	const [violationStartTime, setViolationStartTime] = useState<number | null>(null);
 	const [lastProofSentTime, setLastProofSentTime] = useState<number | null>(null);
 
+	// --- Refs for stable access in callbacks ---
+	const violationStateRef = useRef({ currentViolation, violationStartTime });
+	const proofStateRef = useRef({ lastProofSentTime });
+	const propsRef = useRef({ attemptId, onViolationDetected });
+
+	// Update refs whenever state/props change
+	useEffect(() => {
+		violationStateRef.current = { currentViolation, violationStartTime };
+	}, [currentViolation, violationStartTime]);
+
+	useEffect(() => {
+		proofStateRef.current = { lastProofSentTime };
+	}, [lastProofSentTime]);
+
+	useEffect(() => {
+		propsRef.current = { attemptId, onViolationDetected };
+	}, [attemptId, onViolationDetected]);
+
+	console.log("FaceAttentionChecker re-rendering"); // Log on every render
+
 	// --- Capture Proof Function (Example) ---
 	const captureAndSendProof = useCallback(async (reason: ViolationReason, startTime: number) => {
-		if (!videoRef.current || !attemptId) {
+		// Access current values from refs
+		const { lastProofSentTime: currentLastProofTime } = proofStateRef.current;
+		const { attemptId: currentAttemptId, onViolationDetected: currentOnViolationDetected } = propsRef.current;
+
+		if (!videoRef.current || !currentAttemptId) {
 			console.error("Missing video reference or attemptId for sending proof.");
 			return;
 		}
 
 		const now = Date.now();
-		// Check cooldown
-		if (lastProofSentTime && (now - lastProofSentTime < COOLDOWN_PERIOD_MS)) {
-			console.log(`Cooldown active (${((COOLDOWN_PERIOD_MS - (now - lastProofSentTime)) / 1000).toFixed(1)}s remaining), skipping proof submission.`);
+		// Check cooldown using ref value
+		if (currentLastProofTime && (now - currentLastProofTime < COOLDOWN_PERIOD_MS)) {
+			console.log(`Cooldown active (${((COOLDOWN_PERIOD_MS - (now - currentLastProofTime)) / 1000).toFixed(1)}s remaining), skipping proof submission.`);
 			return;
 		}
 
@@ -107,8 +131,8 @@ const FaceAttentionChecker: React.FC<FaceAttentionCheckerProps> = ({ attemptId, 
 
 		// --- Call API Service ---
 		try {
-			console.log(`Sending ${eventType} event for attempt ${attemptId}...`);
-			const response = await studentService.submitWebcamMonitorEvent(attemptId, eventData);
+			console.log(`Sending ${eventType} event for attempt ${currentAttemptId}...`);
+			const response = await studentService.submitWebcamMonitorEvent(currentAttemptId, eventData);
 			console.log("Webcam monitor event submitted successfully:", response);
 			setStatus(`Proof sent (${eventType}). Monitoring...`);
 		} catch (error) {
@@ -119,17 +143,16 @@ const FaceAttentionChecker: React.FC<FaceAttentionCheckerProps> = ({ attemptId, 
 		}
 
 		// Notify parent component if callback provided
-		if (onViolationDetected) {
-			onViolationDetected(reason, imageDataUrl);
+		if (currentOnViolationDetected) {
+			currentOnViolationDetected(reason, imageDataUrl);
 		}
 
-	}, [lastProofSentTime, onViolationDetected, attemptId]); // Add attemptId dependency
+	}, []); // <-- Empty dependency array
 
 	// --- MediaPipe Results Callback ---
 	const onResults = useCallback((results: FaceMeshResults) => {
-		// Optional: Draw landmarks
-		// const canvasCtx = canvasRef.current?.getContext('2d');
-		// if (canvasCtx && results.multiFaceLandmarks) { ... drawConnectors, drawLandmarks ... }
+		// Access current values from refs
+		const { currentViolation: currentViol, violationStartTime: currentStartTime } = violationStateRef.current;
 
 		const faceCount = results.multiFaceLandmarks?.length ?? 0;
 		let immediateViolation: ViolationReason | null = null;
@@ -153,12 +176,15 @@ const FaceAttentionChecker: React.FC<FaceAttentionCheckerProps> = ({ attemptId, 
 		const now = Date.now();
 
 		if (immediateViolation) {
-			setStatus(`Potential Violation: ${immediateViolation}`);
-			if (currentViolation === immediateViolation) {
+			// Use state setters directly
+			setStatus(prev => prev.startsWith(`Potential Violation: ${immediateViolation}`) ? prev : `Potential Violation: ${immediateViolation}`); // Avoid redundant status updates
+
+			// Use ref values for comparison
+			if (currentViol === immediateViolation) {
 				// Violation persists, check duration
-				if (violationStartTime && (now - violationStartTime >= LOOKING_AWAY_DURATION_MS)) {
+				if (currentStartTime && (now - currentStartTime >= LOOKING_AWAY_DURATION_MS)) {
 					// Duration threshold met, capture proof (includes cooldown check)
-					captureAndSendProof(immediateViolation, violationStartTime); // Pass start time
+					captureAndSendProof(immediateViolation, currentStartTime); // Pass start time
 					// Keep violationStartTime set? Or reset? Resetting prevents immediate re-capture after cooldown.
 					setViolationStartTime(now); // Reset timer start after capture
 				}
@@ -171,18 +197,24 @@ const FaceAttentionChecker: React.FC<FaceAttentionCheckerProps> = ({ attemptId, 
 			}
 		} else {
 			// No immediate violation detected
-			if (currentViolation) {
-				console.log(`Violation (${currentViolation}) ended.`);
+			// Use ref value for comparison
+			if (currentViol) {
+				console.log(`Violation (${currentViol}) ended.`);
 			}
-			setStatus(faceCount === 1 ? 'Attention OK' : (faceCount === 0 ? 'No face detected' : `Multiple faces: ${faceCount}`));
+			setStatus(prev => { // Avoid redundant status updates
+				const newStatus = faceCount === 1 ? 'Attention OK' : (faceCount === 0 ? 'No face detected' : `Multiple faces: ${faceCount}`);
+				return prev === newStatus ? prev : newStatus;
+			});
 			setCurrentViolation(null);
 			setViolationStartTime(null); // Reset timer
 		}
 
-	}, [currentViolation, violationStartTime, captureAndSendProof]); // Dependencies for the callback
+	}, [captureAndSendProof]); // <-- captureAndSendProof is now stable
 
 	// --- Initialization Effect ---
 	useEffect(() => {
+		console.log(">>> FaceAttentionChecker INITIALIZATION EFFECT RUNNING <<<"); // Log when effect runs
+
 		if (!videoRef.current) return;
 
 		const videoElement = videoRef.current;
@@ -203,9 +235,10 @@ const FaceAttentionChecker: React.FC<FaceAttentionCheckerProps> = ({ attemptId, 
 		// --- Initialize Camera ---
 		const camera = new cam.Camera(videoElement, {
 			onFrame: async () => {
-				if (videoElement && videoElement.readyState >= 3) { // Check if video frame is ready
+				if (videoElement && videoElement.readyState >= 3 && faceMeshRef.current) { // Check facemesh ref too
 					try {
-						await faceMesh.send({ image: videoElement });
+						// Use the ref to access the current facemesh instance
+						await faceMeshRef.current.send({ image: videoElement });
 					} catch (error) {
 						console.error("Error sending frame to MediaPipe:", error);
 						// Handle potential errors, maybe stop camera/facemesh
@@ -231,9 +264,9 @@ const FaceAttentionChecker: React.FC<FaceAttentionCheckerProps> = ({ attemptId, 
 
 		// --- Cleanup function ---
 		return () => {
-			console.log("Cleaning up FaceAttentionChecker...");
-			camera.stop();
-			faceMesh.close();
+			console.log(">>> FaceAttentionChecker CLEANUP EFFECT RUNNING <<<"); // Log on cleanup
+			cameraRef.current?.stop();
+			faceMeshRef.current?.close();
 			faceMeshRef.current = null;
 			cameraRef.current = null;
 		};
@@ -251,7 +284,7 @@ const FaceAttentionChecker: React.FC<FaceAttentionCheckerProps> = ({ attemptId, 
 					display: 'block', // Keep display block
 					width: '100%',    // Make width responsive
 					height: 'auto',   // Adjust height automatically to maintain aspect ratio
-					// transform: 'scaleX(-1)' // Keep this line ONLY if you WANT the mirrored view
+					transform: 'scaleX(-1)' // Keep this line ONLY if you WANT the mirrored view
 				}}
 			></video>
 		</div>
