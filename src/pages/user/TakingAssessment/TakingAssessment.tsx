@@ -154,7 +154,7 @@ const TakingAssessment: React.FC = () => {
 									<h5>Monitoring</h5>
 									{/* Pass the attemptId AND the callback */}
 									<FaceAttentionChecker
-										attemptId={attemptId}
+										attemptId={attemptId!}
 										onViolationDetected={handleViolationDetected} // Pass the callback here
 									/>
 

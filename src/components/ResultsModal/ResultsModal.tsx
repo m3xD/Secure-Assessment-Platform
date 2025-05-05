@@ -18,7 +18,7 @@ const ResultsModal: React.FC<ResultsModalProps> = ({ onClose }) => { // Destruct
   const isPassed =
     state.submittedResult?.results.status?.toLowerCase() === "passed";
 
-  // Handler specifically for viewing detailed results
+  // Handler specifically for viewing detailed results - KEEP AS IS
   const handleViewDetails = () => {
     if (state.submittedResult?.assessmentId) {
         dispatch({ type: "CLOSE_RESULT_MODAL" }); // Close modal first

@@ -310,11 +310,10 @@ export const useTakingAssessment = (urlAttemptId: string | undefined) => {
     }
   }, [assessment, attemptId, navigate, dispatch, pendingAnswers]);
 
-  // --- Function to handle closing the results modal ---
+  // --- Function to handle closing the results modal AND navigating to dashboard ---
   const handleCloseResultsModal = useCallback(() => {
-    dispatch({ type: "CLOSE_RESULT_MODAL" }); // Dispatch action to hide modal in state
-    navigate('/user/dashboard'); // Navigate to dashboard
-  }, [dispatch, navigate]); // Add dependencies
+    navigate('/user/dashboard'); // Navigate to dashboard - this will unmount TakingAssessment
+  }, [navigate]); // Dependency only on navigate
 
   // Other utility functions remain the same
   const calculateProgress = useCallback(() => {
