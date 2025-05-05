@@ -31,6 +31,7 @@ const TakingAssessment: React.FC = () => {
 		answers,
 		isSubmitting,
 		webcamWarnings,
+		submittedResult, // <-- Destructure submittedResult
 		getCurrentQuestion,
 		getCurrentAnswer,
 		formatTimeRemaining,
@@ -77,7 +78,7 @@ const TakingAssessment: React.FC = () => {
 	}
 
 	// Ensure attemptId provided by the hook is available after loading
-	if (!attemptId) {
+	if (!attemptId && !assessmentLoading && !assessmentError) {
 		// ... error display for missing attemptId after load ...
 		return (
 			<Container className="taking-assessment">
@@ -142,91 +143,102 @@ const TakingAssessment: React.FC = () => {
 					</Col>
 				</Row>
 
-				{/* Content */}
-				<Row className="assessment-content">
-					{/* Sidebar */}
-					<Col md={3} className="webcam-sidebar">
-						<Card className="webcam-card">
-							<Card.Body>
-								<h5>Monitoring</h5>
-								{/* Pass the attemptId AND the callback */}
-								<FaceAttentionChecker
-									attemptId={attemptId}
-									onViolationDetected={handleViolationDetected} // Pass the callback here
-								/>
+				 {/* --- Conditionally render content based on submission status --- */}
+				{!submittedResult ? ( // <-- Only render if NOT submitted
+					<Row className="assessment-content">
+						{/* Sidebar */}
+						<Col md={3} className="webcam-sidebar">
+							<Card className="webcam-card">
+								<Card.Body>
+									<h5>Monitoring</h5>
+									{/* Pass the attemptId AND the callback */}
+									<FaceAttentionChecker
+										attemptId={attemptId}
+										onViolationDetected={handleViolationDetected} // Pass the callback here
+									/>
 
-								{/* Display warnings */}
-								{webcamWarnings > 0 && (
-									<Alert variant="warning" className="mt-3">
-										<small>Warnings Recorded: {webcamWarnings}</small>
-									</Alert>
-								)}
-							</Card.Body>
-						</Card>
+									{/* Display warnings */}
+									{webcamWarnings > 0 && (
+										<Alert variant="warning" className="mt-3">
+											<small>Warnings Recorded: {webcamWarnings}</small>
+										</Alert>
+									)}
+								</Card.Body>
+							</Card>
 
-						{/* Progress Card */}
-						<Card className="progress-card mt-3">
-							{/* ... Progress card content ... */}
-							<Card.Body>
-								<h5>Progress</h5>
-								<ProgressBar
-									now={calculateProgress()}
-									label={`${calculateProgress()}%`}
-									variant="primary"
-								/>
-								<div className="d-flex justify-content-between mt-2">
-									<small>{answers.filter(a => a.answer?.trim() !== '').length} of {assessment?.questions.length || 0} answered</small>
-								</div>
-							</Card.Body>
-						</Card>
-					</Col>
-
-					{/* Question Area */}
-					<Col md={9}>
-						<Card className="question-card">
-							{/* ... Question card content ... */}
-							<Card.Body>
-								<div className="question-header">
-									<h5>Question {currentQuestionIndex + 1} of {assessment?.questions.length || 0}</h5>
-								</div>
-
-								<div className="question-content">
-									{renderCurrentQuestion()}
-								</div>
-
-								<div className="question-footer d-flex justify-content-between mt-4">
-									<Button
-										variant="outline-secondary"
-										onClick={handlePrevQuestion}
-										disabled={currentQuestionIndex === 0}
-									>
-										<ArrowLeft size={16} className="me-2" /> Previous
-									</Button>
-
-									<div>
-										{currentQuestionIndex === (assessment?.questions.length || 0) - 1 ? (
-											<Button
-												variant="success"
-												onClick={handleSubmitAssessment}
-												disabled={isSubmitting}
-											>
-												<CheckCircle size={16} className="me-2" />
-												{isSubmitting ? 'Submitting...' : 'Submit Assessment'}
-											</Button>
-										) : (
-											<Button
-												variant="primary"
-												onClick={handleNextQuestion}
-											>
-												Next <ArrowRight size={16} className="ms-2" />
-											</Button>
-										)}
+							{/* Progress Card */}
+							<Card className="progress-card mt-3">
+								{/* ... Progress card content ... */}
+								<Card.Body>
+									<h5>Progress</h5>
+									<ProgressBar
+										now={calculateProgress()}
+										label={`${calculateProgress()}%`}
+										variant="primary"
+									/>
+									<div className="d-flex justify-content-between mt-2">
+										<small>{answers.filter(a => a.answer?.trim() !== '').length} of {assessment?.questions.length || 0} answered</small>
 									</div>
-								</div>
-							</Card.Body>
-						</Card>
-					</Col>
-				</Row>
+								</Card.Body>
+							</Card>
+						</Col>
+
+						{/* Question Area */}
+						<Col md={9}>
+							<Card className="question-card">
+								{/* ... Question card content ... */}
+								<Card.Body>
+									<div className="question-header">
+										<h5>Question {currentQuestionIndex + 1} of {assessment?.questions.length || 0}</h5>
+									</div>
+
+									<div className="question-content">
+										{renderCurrentQuestion()}
+									</div>
+
+									<div className="question-footer d-flex justify-content-between mt-4">
+										<Button
+											variant="outline-secondary"
+											onClick={handlePrevQuestion}
+											disabled={currentQuestionIndex === 0}
+										>
+											<ArrowLeft size={16} className="me-2" /> Previous
+										</Button>
+
+										<div>
+											{currentQuestionIndex === (assessment?.questions.length || 0) - 1 ? (
+												<Button
+													variant="success"
+													onClick={handleSubmitAssessment}
+													disabled={isSubmitting}
+												>
+													<CheckCircle size={16} className="me-2" />
+													{isSubmitting ? 'Submitting...' : 'Submit Assessment'}
+												</Button>
+											) : (
+												<Button
+													variant="primary"
+													onClick={handleNextQuestion}
+												>
+													Next <ArrowRight size={16} className="ms-2" />
+												</Button>
+											)}
+										</div>
+									</div>
+								</Card.Body>
+							</Card>
+						</Col>
+					</Row>
+				) : (
+					// Optional: Show a message indicating submission is complete while modal is visible
+					<Row className="assessment-content justify-content-center align-items-center" style={{ minHeight: '50vh' }}>
+						<Col xs="auto" className="text-center">
+							<CheckCircle size={48} className="text-success mb-3" />
+							<h4>Assessment Submitted</h4>
+							<p>Processing your results...</p>
+						</Col>
+					</Row>
+				)}
 			</Container>
 			{/* Results Modal */}
 			<ResultsModal />

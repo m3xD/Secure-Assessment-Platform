@@ -32,6 +32,7 @@ export const useTakingAssessment = (urlAttemptId: string | undefined) => {
     remainingTime,
     isSubmitting,
     webcamWarnings,
+    submittedResult, // <-- Destructure submittedResult
   } = state;
 
   // Using hook tracking suspicious activity
@@ -344,6 +345,7 @@ export const useTakingAssessment = (urlAttemptId: string | undefined) => {
     answers,
     isSubmitting,
     webcamWarnings,
+    submittedResult, // <-- Add submittedResult here
 
     getCurrentQuestion,
     getCurrentAnswer,
