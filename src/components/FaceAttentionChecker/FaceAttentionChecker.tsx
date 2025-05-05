@@ -3,6 +3,8 @@
 import * as cam from '@mediapipe/camera_utils';
 import { FaceMesh, Results as FaceMeshResults, NormalizedLandmarkList } from '@mediapipe/face_mesh';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import studentService from '../../services/studentService'; // Import student service
+import { WebcamEvent } from '../../types/StudentServiceTypes'; // Import WebcamEvent type
 import { checkAttentionAndGaze, checkMultiFace, ViolationReason } from './detectionUtils'; // Import detection utils
 import { defaultDetectionConfig } from './faceAttentionConfig'; // Import default detection config
 // Import API utilities (you'll need to create/adapt these)
@@ -17,12 +19,31 @@ const VIDEO_HEIGHT = 480;
 // --- Prop Interface (Example) ---
 // Define any props needed, e.g., user ID, attempt ID
 interface FaceAttentionCheckerProps {
+	attemptId: string; // Make attemptId mandatory
 	onViolationDetected?: (reason: ViolationReason, imageDataUrl: string) => void; // Callback for parent component
 	// userId?: string; // Example prop
 	// attemptId?: string; // Example prop
 }
 
-const FaceAttentionChecker: React.FC<FaceAttentionCheckerProps> = ({ onViolationDetected }) => {
+// Helper function to map internal reason to API event type
+const mapReasonToEventType = (reason: ViolationReason): WebcamEvent['eventType'] | null => {
+	switch (reason) {
+		case 'head_yaw':
+		case 'head_pitch':
+		case 'gaze_direction':
+			return "LOOKING_AWAY";
+		case 'multiple_faces':
+			return "MULTIPLE_FACES";
+		// Add mapping for 'no_face' if you implement it as a violation
+		// case 'no_face':
+		//     return "FACE_NOT_DETECTED";
+		default:
+			console.warn("Unknown violation reason:", reason);
+			return null; // Or handle as needed
+	}
+};
+
+const FaceAttentionChecker: React.FC<FaceAttentionCheckerProps> = ({ attemptId, onViolationDetected }) => {
 	const videoRef = useRef<HTMLVideoElement>(null);
 	const canvasRef = useRef<HTMLCanvasElement>(null); // Optional: for drawing landmarks
 	const faceMeshRef = useRef<FaceMesh | null>(null);
@@ -36,17 +57,26 @@ const FaceAttentionChecker: React.FC<FaceAttentionCheckerProps> = ({ onViolation
 	const [lastProofSentTime, setLastProofSentTime] = useState<number | null>(null);
 
 	// --- Capture Proof Function (Example) ---
-	const captureAndSendProof = useCallback(async (reason: ViolationReason) => {
-		if (!videoRef.current) return;
+	const captureAndSendProof = useCallback(async (reason: ViolationReason, startTime: number) => {
+		if (!videoRef.current || !attemptId) {
+			console.error("Missing video reference or attemptId for sending proof.");
+			return;
+		}
 
 		const now = Date.now();
 		// Check cooldown
 		if (lastProofSentTime && (now - lastProofSentTime < COOLDOWN_PERIOD_MS)) {
-			console.log("Cooldown active, skipping proof submission.");
+			console.log(`Cooldown active (${((COOLDOWN_PERIOD_MS - (now - lastProofSentTime)) / 1000).toFixed(1)}s remaining), skipping proof submission.`);
 			return;
 		}
 
-		console.log(`Violation detected (${reason}), capturing proof...`);
+		const eventType = mapReasonToEventType(reason);
+		if (!eventType) {
+			console.error("Cannot map reason to event type:", reason);
+			return; // Don't send if reason is unknown
+		}
+
+		console.log(`Violation detected (${reason} -> ${eventType}), capturing proof...`);
 		setStatus(`Violation: ${reason}. Capturing proof...`);
 
 		// Capture image from video
@@ -54,33 +84,45 @@ const FaceAttentionChecker: React.FC<FaceAttentionCheckerProps> = ({ onViolation
 		canvas.width = videoRef.current.videoWidth;
 		canvas.height = videoRef.current.videoHeight;
 		const ctx = canvas.getContext('2d');
-		if (!ctx) return;
+		if (!ctx) {
+			console.error("Failed to get canvas context for proof capture.");
+			return;
+		}
 		ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
 		const imageDataUrl = canvas.toDataURL('image/jpeg'); // Or 'image/png'
 
+		// Prepare event data
+		const eventData: WebcamEvent = {
+			eventType: eventType,
+			timestamp: new Date(now).toISOString(), // Use ISO string format
+			imageData: imageDataUrl, // Assign captured image data
+			details: {
+				duration: now - startTime, // Calculate duration
+				confidence: 1.0 // Default confidence to 1.0, adjust if needed
+			}
+		};
+
 		setLastProofSentTime(now); // Update last sent time *before* async call
 
-		// TODO: Replace with actual API call
-		console.log(`Simulating sending proof for ${reason}. Image size: ${imageDataUrl.length}`);
-		// try {
-		//     await sendViolationProof({ attemptId: 'your_attempt_id', reason, imageBase64: imageDataUrl }); // Pass necessary IDs
-		//     console.log("Proof sent successfully.");
-		// } catch (error) {
-		//     console.error("Failed to send violation proof:", error);
-		//     // Optionally reset lastProofSentTime if sending failed critically?
-		// }
+		// --- Call API Service ---
+		try {
+			console.log(`Sending ${eventType} event for attempt ${attemptId}...`);
+			const response = await studentService.submitWebcamMonitorEvent(attemptId, eventData);
+			console.log("Webcam monitor event submitted successfully:", response);
+			setStatus(`Proof sent (${eventType}). Monitoring...`);
+		} catch (error) {
+			console.error("Failed to submit webcam monitor event:", error);
+			setStatus(`Error sending proof: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			// Optionally reset lastProofSentTime if sending failed critically?
+			// setLastProofSentTime(null);
+		}
 
 		// Notify parent component if callback provided
 		if (onViolationDetected) {
 			onViolationDetected(reason, imageDataUrl);
 		}
 
-		// Reset violation state after sending proof to avoid immediate re-triggering? Or rely on cooldown?
-		// setCurrentViolation(null);
-		// setViolationStartTime(null);
-		// setStatus('Proof captured. Monitoring...'); // Update status
-
-	}, [lastProofSentTime, onViolationDetected]); // Add dependencies like attemptId if needed
+	}, [lastProofSentTime, onViolationDetected, attemptId]); // Add attemptId dependency
 
 	// --- MediaPipe Results Callback ---
 	const onResults = useCallback((results: FaceMeshResults) => {
@@ -115,9 +157,9 @@ const FaceAttentionChecker: React.FC<FaceAttentionCheckerProps> = ({ onViolation
 				// Violation persists, check duration
 				if (violationStartTime && (now - violationStartTime >= LOOKING_AWAY_DURATION_MS)) {
 					// Duration threshold met, capture proof (includes cooldown check)
-					captureAndSendProof(immediateViolation);
+					captureAndSendProof(immediateViolation, violationStartTime); // Pass start time
 					// Keep violationStartTime set? Or reset? Resetting prevents immediate re-capture after cooldown.
-					// setViolationStartTime(now); // Reset timer start after capture
+					setViolationStartTime(now); // Reset timer start after capture
 				}
 				// else: Violation persists but duration not met yet
 			} else {

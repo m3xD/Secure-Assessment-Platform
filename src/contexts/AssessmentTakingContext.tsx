@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useReducer, ReactNode } from "react";
+import React, { createContext, ReactNode, useContext, useReducer } from "react";
 import {
-  StartAssessment,
-  Answer,
-  SubmitAssessmentResponse,
+	Answer,
+	StartAssessment,
+	SubmitAssessmentResponse,
 } from "../types/StudentServiceTypes";
 
 // State interface
@@ -30,6 +30,7 @@ interface AssessmentTakingState {
       | null;
     tabSwitches: number;
   };
+  attemptId?: string; // <-- Add attemptId to state interface
 }
 
 // Initial state
@@ -61,6 +62,7 @@ type AssessmentTakingAction =
         assessment: StartAssessment;
         initialAnswers: Answer[];
         timeRemaining: number;
+        attemptId: string; // <-- Add attemptId to payload type
       };
     }
   | { type: "LOAD_ASSESSMENT_ERROR"; payload: string }
@@ -106,8 +108,10 @@ const assessmentTakingReducer = (
         ...state,
         loading: false,
         assessment: action.payload.assessment,
+        attemptId: action.payload.attemptId, // <-- Set attemptId in state
         answers: action.payload.initialAnswers,
         remainingTime: action.payload.timeRemaining,
+        error: null,
       };
 
     case "LOAD_ASSESSMENT_ERROR":
