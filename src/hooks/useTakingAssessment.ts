@@ -310,6 +310,12 @@ export const useTakingAssessment = (urlAttemptId: string | undefined) => {
     }
   }, [assessment, attemptId, navigate, dispatch, pendingAnswers]);
 
+  // --- Function to handle closing the results modal ---
+  const handleCloseResultsModal = useCallback(() => {
+    dispatch({ type: "CLOSE_RESULT_MODAL" }); // Dispatch action to hide modal in state
+    navigate('/user/dashboard'); // Navigate to dashboard
+  }, [dispatch, navigate]); // Add dependencies
+
   // Other utility functions remain the same
   const calculateProgress = useCallback(() => {
     if (!assessment) return 0;
@@ -356,5 +362,6 @@ export const useTakingAssessment = (urlAttemptId: string | undefined) => {
     handleSubmitAssessment,
     calculateProgress,
     handleViolationDetected,
+    handleCloseResultsModal, // <-- Return the new handler function
   };
 };

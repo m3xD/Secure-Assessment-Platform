@@ -40,7 +40,8 @@ const TakingAssessment: React.FC = () => {
 		handlePrevQuestion,
 		handleSubmitAssessment,
 		calculateProgress,
-		handleViolationDetected // Get the callback from the hook
+		handleViolationDetected, // Get the callback from the hook
+		handleCloseResultsModal // <-- Destructure the handler
 	} = useTakingAssessment(urlAttemptId); // Pass attemptId from URL
 
 	// Optional: Handle navigation if attemptId is missing early
@@ -241,7 +242,7 @@ const TakingAssessment: React.FC = () => {
 				)}
 			</Container>
 			{/* Results Modal */}
-			<ResultsModal />
+			<ResultsModal onClose={handleCloseResultsModal} />
 		</div>
 	);
 };
