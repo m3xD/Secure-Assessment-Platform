@@ -35,9 +35,8 @@ const mapReasonToEventType = (reason: ViolationReason): WebcamEvent['eventType']
 			return "LOOKING_AWAY";
 		case 'multiple_faces':
 			return "MULTIPLE_FACES";
-		// Add mapping for 'no_face' if you implement it as a violation
-		// case 'no_face':
-		//     return "FACE_NOT_DETECTED";
+		case 'no_face':
+			return "FACE_NOT_DETECTED";
 		default:
 			console.warn("Unknown violation reason:", reason);
 			return null; // Or handle as needed
@@ -75,7 +74,7 @@ const FaceAttentionChecker: React.FC<FaceAttentionCheckerProps> = ({ attemptId, 
 		propsRef.current = { attemptId, onViolationDetected };
 	}, [attemptId, onViolationDetected]);
 
-	console.log("FaceAttentionChecker re-rendering"); // Log on every render
+	// console.log("FaceAttentionChecker re-rendering"); // Log on every render
 
 	// --- Capture Proof Function (Example) ---
 	const captureAndSendProof = useCallback(async (reason: ViolationReason, startTime: number) => {
@@ -95,7 +94,7 @@ const FaceAttentionChecker: React.FC<FaceAttentionCheckerProps> = ({ attemptId, 
 			return;
 		}
 
-		const eventType = mapReasonToEventType(reason);
+		const eventType = mapReasonToEventType(reason); // <-- Translation step
 		if (!eventType) {
 			console.error("Cannot map reason to event type:", reason);
 			return; // Don't send if reason is unknown
@@ -114,11 +113,14 @@ const FaceAttentionChecker: React.FC<FaceAttentionCheckerProps> = ({ attemptId, 
 			return;
 		}
 		ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-		const imageDataUrl = canvas.toDataURL('image/jpeg'); // Or 'image/png'
+		const imageDataUrl = canvas.toDataURL('image/jpeg')
+		// .split(",/")[1]; // Or 'image/png'
+
+		// console.log(">>>>>>>>>>>>>>>>  Captured image data URL:", imageDataUrl); // Log captured image data
 
 		// Prepare event data
 		const eventData: WebcamEvent = {
-			eventType: eventType,
+			eventType: eventType, // <-- Use the translated type
 			timestamp: new Date(now).toISOString(), // Use ISO string format
 			imageData: imageDataUrl, // Assign captured image data
 			details: {
@@ -132,7 +134,7 @@ const FaceAttentionChecker: React.FC<FaceAttentionCheckerProps> = ({ attemptId, 
 		// --- Call API Service ---
 		try {
 			console.log(`Sending ${eventType} event for attempt ${currentAttemptId}...`);
-			const response = await studentService.submitWebcamMonitorEvent(currentAttemptId, eventData);
+			const response = await studentService.submitWebcamMonitorEvent(currentAttemptId, eventData); // Send standardized event
 			console.log("Webcam monitor event submitted successfully:", response);
 			setStatus(`Proof sent (${eventType}). Monitoring...`);
 		} catch (error) {

@@ -4,7 +4,7 @@ import { FaceAttentionConfig } from './faceAttentionConfig';
 
 
 // Define possible violation reasons
-export type ViolationReason = 'head_yaw' | 'head_pitch' | 'gaze_direction' | 'multiple_faces';
+export type ViolationReason = 'head_yaw' | 'head_pitch' | 'gaze_direction' | 'multiple_faces' | 'no_face';
 
 /**
  * Analyzes face landmarks for immediate head pose and gaze direction violations.
