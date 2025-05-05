@@ -13,8 +13,9 @@ import { defaultDetectionConfig } from './faceAttentionConfig'; // Import defaul
 // --- Component-Level Configuration ---
 const LOOKING_AWAY_DURATION_MS = 3000; // How long violation must persist
 const COOLDOWN_PERIOD_MS = 10000;     // Min time between sending proofs
-const VIDEO_WIDTH = 640;
-const VIDEO_HEIGHT = 480;
+// Remove fixed dimensions here if not needed elsewhere, or keep for reference
+// const VIDEO_WIDTH = 640;
+// const VIDEO_HEIGHT = 480;
 
 // --- Prop Interface (Example) ---
 // Define any props needed, e.g., user ID, attempt ID
@@ -211,8 +212,9 @@ const FaceAttentionChecker: React.FC<FaceAttentionCheckerProps> = ({ attemptId, 
 					}
 				}
 			},
-			width: VIDEO_WIDTH,
-			height: VIDEO_HEIGHT
+			// Remove fixed width/height here if using CSS for display size
+			// width: VIDEO_WIDTH,
+			// height: VIDEO_HEIGHT
 		});
 		camera.start()
 			.then(() => {
@@ -240,10 +242,18 @@ const FaceAttentionChecker: React.FC<FaceAttentionCheckerProps> = ({ attemptId, 
 	return (
 		<div>
 			<p>Status: {status}</p>
-			{/* Keep video visible for debugging, hide in production? */}
-			<video ref={videoRef} width={VIDEO_WIDTH} height={VIDEO_HEIGHT} autoPlay playsInline style={{ display: 'block', transform: 'scaleX(-1)' }}></video>
-			{/* Optional canvas for drawing */}
-			{/* <canvas ref={canvasRef} width={VIDEO_WIDTH} height={VIDEO_HEIGHT} style={{ position: 'absolute', top: 0, left: 0 }}></canvas> */}
+			{/* Remove width/height attributes, use CSS for responsive sizing */}
+			<video
+				ref={videoRef}
+				autoPlay
+				playsInline
+				style={{
+					display: 'block', // Keep display block
+					width: '100%',    // Make width responsive
+					height: 'auto',   // Adjust height automatically to maintain aspect ratio
+					// transform: 'scaleX(-1)' // Keep this line ONLY if you WANT the mirrored view
+				}}
+			></video>
 		</div>
 	);
 };
