@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Question, QuestionData } from "../types/QuestionTypes";
 import { mainApi } from "../utils/AxiosInterceptor";
 
