@@ -23,8 +23,6 @@ var/
 # Datasets and models
 Dataset/FaceData/raw/*
 Dataset/FaceData/processed/*
-Models/*
-!Models/.gitkeep
 !Dataset/FaceData/raw/.gitkeep
 !Dataset/FaceData/processed/.gitkeep
 
