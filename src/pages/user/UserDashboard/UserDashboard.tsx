@@ -48,8 +48,10 @@ const UserDashboard: React.FC = () => {
             attemptId: "attempt-1",
             assessmentId: "assessment-1",
             title: "Introduction to JavaScript",
-            date: new Date(Date.now() - 86400000 * 2).toISOString(), // 2 days ago
+            startedAt: new Date(Date.now() - 86400000 * 3).toISOString(), // 3 days ago
+            submittedAt: new Date(Date.now() - 86400000 * 2).toISOString(), // 2 days ago
             score: 85,
+            passingScore: 70,
             duration: 45,
             status: "passed",
             feedback: "Good work on JavaScript fundamentals!"
@@ -58,8 +60,10 @@ const UserDashboard: React.FC = () => {
             attemptId: "attempt-2",
             assessmentId: "assessment-2",
             title: "React Fundamentals",
-            date: new Date(Date.now() - 86400000 * 5).toISOString(), // 5 days ago
+            startedAt: new Date(Date.now() - 86400000 * 6).toISOString(), // 6 days ago
+            submittedAt: new Date(Date.now() - 86400000 * 5).toISOString(), // 5 days ago
             score: 92,
+            passingScore: 75,
             duration: 60,
             status: "passed",
             feedback: "Excellent understanding of React concepts!"
@@ -139,7 +143,7 @@ const UserDashboard: React.FC = () => {
 
         {/* Stats Cards */}
         <Row className="stats-section">
-          <Col md={3}>
+          <Col md={3} className="mb-4 mb-md-0">
             <Card className="stat-card">
               <Card.Body>
                 <div className="d-flex align-items-center">
@@ -155,7 +159,7 @@ const UserDashboard: React.FC = () => {
             </Card>
           </Col>
           
-          <Col md={3}>
+          <Col md={3} className="mb-4 mb-md-0">
             <Card className="stat-card">
               <Card.Body>
                 <div className="d-flex align-items-center">
@@ -171,7 +175,7 @@ const UserDashboard: React.FC = () => {
             </Card>
           </Col>
           
-          <Col md={3}>
+          <Col md={3} className="mb-4 mb-md-0">
             <Card className="stat-card">
               <Card.Body>
                 <div className="d-flex align-items-center">
@@ -265,7 +269,7 @@ const UserDashboard: React.FC = () => {
             </Card>
           </Col>
           
-          <Col lg={4}>
+          <Col lg={4} className="mt-lg-0 mt-4">
             <Card className="results-card">
               <Card.Header className="d-flex justify-content-between align-items-center">
                 <h5 className="mb-0">Recent Results</h5>
@@ -287,7 +291,7 @@ const UserDashboard: React.FC = () => {
                           <td>
                             <div>
                               <div className="fw-medium">{result.title}</div>
-                              <small className="text-muted">{formatDate(result.date)}</small>
+                              <small className="text-muted">{formatDate(result.submittedAt)}</small>
                             </div>
                           </td>
                           <td>{result.score}%</td>
