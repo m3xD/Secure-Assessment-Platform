@@ -1,0 +1,43 @@
+name: Go Unit Tests
+
+on:
+  push:
+    branches: [ "main", "develop" ] # Chạy khi push lên nhánh main hoặc develop
+  pull_request:
+    branches: [ "main", "develop" ] # Chạy khi có pull request vào nhánh main hoặc develop
+
+# Định nghĩa các jobs sẽ chạy
+jobs:
+  test: 
+    runs-on: ubuntu-latest 
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4 # Sử dụng action checkout phiên bản 4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5 # Sử dụng action setup-go phiên bản 5
+        with:
+          go-version: '1.23.7' # Chỉ định phiên bản Go bạn đang sử dụng (ví dụ: 1.21)
+          cache: true # Bật caching cho các Go module để tăng tốc độ build sau này
+          
+      - name: Run unit tests with coverage
+        run: |
+          mkdir -p .qodana/code-coverage 
+          go test -v -race -coverprofile .qodana/code-coverage/coverage.out -covermode=atomic ./...
+        working-directory: .
+        
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: go-coverage-data
+          path: .qodana/code-coverage       
+          if-no-files-found: error
+          
+      - name: Qodana Scan
+        uses: JetBrains/qodana-action@main
+        env:
+          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_148180999 }}
+        with:
+          args: "-i,.,--linter,jetbrains/qodana-go:latest"
+          pr-mode: false
