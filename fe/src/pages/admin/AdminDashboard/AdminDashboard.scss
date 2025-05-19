@@ -1,0 +1,211 @@
+.admin-dashboard {
+  background: var(--color-background);
+  padding: var(--padding-1);
+  margin-top: var(--header-height);
+  min-height: calc(100vh - var(--header-height));
+  
+  .dashboard-header {
+    margin-bottom: 2rem;
+    
+    h1 {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--color-dark);
+    }
+  }
+
+  .stats-section {
+    margin-bottom: 2rem;
+    
+    .stat-card {
+      border-radius: var(--card-border-radius);
+      border: none;
+      box-shadow: var(--box-shadow);
+      transition: transform 0.3s, box-shadow 0.3s;
+      overflow: hidden;
+      height: 100%;
+      
+      &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      }
+      
+      .card-body {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      h3 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+        color: var(--color-dark);
+      }
+      
+      p {
+        color: var(--color-dark-variant);
+        margin-bottom: 0;
+      }
+      
+      .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        
+        &.bg-primary-light {
+          background-color: rgba(115, 128, 236, 0.1);
+        }
+        
+        &.bg-success-light {
+          background-color: rgba(65, 241, 182, 0.1);
+        }
+        
+        &.bg-warning-light {
+          background-color: rgba(255, 187, 85, 0.1);
+        }
+        
+        &.bg-danger-light {
+          background-color: rgba(255, 119, 130, 0.1);
+        }
+      }
+      
+      .stat-footer {
+        margin-top: auto;
+        padding-top: 1rem;
+        font-size: 0.85rem;
+        color: var(--color-dark-variant);
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+      }
+    }
+  }
+
+  .dashboard-card {
+    border-radius: var(--card-border-radius);
+    border: none;
+    box-shadow: var(--box-shadow);
+    height: 100%;
+    
+    .card-header {
+      background-color: white;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      padding: 1rem 1.5rem;
+      
+      h5 {
+        font-weight: 600;
+      }
+    }
+  }
+  
+  // Timeline styling
+  .timeline-container {
+    padding: 1rem 0;
+    max-height: 500px;
+    overflow-y: auto;
+  }
+  
+  .timeline-item {
+    position: relative;
+    padding: 0 1.5rem 1.5rem 3rem;
+    
+    &:last-child {
+      padding-bottom: 0;
+    }
+    
+    .timeline-marker {
+      position: absolute;
+      left: 1.5rem;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      top: 6px;
+      
+      &:before {
+        content: '';
+        position: absolute;
+        top: 12px;
+        left: 6px;
+        height: calc(100% + 12px);
+        width: 2px;
+        background: var(--color-light);
+        transform: translateX(-50%);
+      }
+    }
+    
+    &:last-child .timeline-marker:before {
+      display: none;
+    }
+    
+    .timeline-content {
+      h6 {
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+      }
+      
+      p {
+        margin-bottom: 0.25rem;
+      }
+    }
+  }
+  
+  // System status styling
+  .status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    
+    &.healthy {
+      background-color: var(--color-success);
+    }
+    
+    &.degraded {
+      background-color: var(--color-warning);
+    }
+    
+    &.down {
+      background-color: var(--color-danger);
+    }
+  }
+  
+  .system-services-table {
+    font-size: 0.9rem;
+    
+    th, td {
+      padding: 0.5rem;
+    }
+    
+    th {
+      border-bottom-width: 1px;
+      font-weight: 600;
+    }
+  }
+  
+  .system-stats {
+    font-size: 0.85rem;
+    
+    .progress {
+      height: 8px;
+      margin-bottom: 1rem;
+      background-color: rgba(0, 0, 0, 0.05);
+      
+      .progress-bar {
+        background-color: var(--color-primary);
+      }
+    }
+  }
+
+  ul {
+    li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #eee;
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+  }
+}

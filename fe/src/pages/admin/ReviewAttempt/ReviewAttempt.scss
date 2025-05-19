@@ -1,0 +1,6 @@
+.review-attempt {
+    margin-top: var(--header-height);
+    background: var(--color-background);
+    padding: var(--padding-1);
+    min-height: calc(100vh - var(--header-height));
+}
