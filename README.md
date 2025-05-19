@@ -23,7 +23,7 @@
 | frontend      | User interface for students and admin      | React, Vite, Bootstrap |
 | message-relay | Message relay for push notification | Go, Postgres        |
 | ai-service | AI service for face recognition and behavior analysis | Python, OpenCV, MTCNN, Facenet |
-| proctoring-service | Proctoring service for monitoring user behavior | Go, OpenCV, MTCNN |
+| proctoring-service | Proctoring service for monitoring user behavior | Go, Postgres |
 ---
 
 ## 3. Giao tiếp giữa các service, giữa client & service:
